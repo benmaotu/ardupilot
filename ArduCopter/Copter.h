@@ -679,6 +679,10 @@ private:
     void read_AHRS(void);
     void update_altitude();
 
+    float KF_Try(float ResrcData,float ProcessNoise_Q,float MeasureNoise_R);
+    float update_KF_Try();
+    float H;
+
     // Attitude.cpp
     float get_pilot_desired_yaw_rate(int16_t stick_angle);
     void update_throttle_hover();
