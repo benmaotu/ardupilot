@@ -454,7 +454,7 @@ void Copter::one_hz_loop()
     // functioning correctly
     update_sensor_status_flags();
 
-    gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.1fm",H);//向地面站发送滤波后的高度信息
+    gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",H);//向地面站发送滤波后的高度信息
 }
 
 // called at 50hz
@@ -615,7 +615,7 @@ float Copter::update_KF_Try()
     float h;
     float h_KF;
     h = barometer.get_altitude() * 100.0f;
-    h_KF = KF_Try(h,0.004,0.04);
+    h_KF = KF_Try(h,0.004,1.0);
     return h_KF;
 }
 
