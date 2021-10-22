@@ -943,6 +943,11 @@ private:
     void userhook_auxSwitch2(uint8_t ch_flag);
     void userhook_auxSwitch3(uint8_t ch_flag);
 
+    //IMM_KF.cpp
+    float KF_Try(float ResrcData,float ProcessNoise_Q,float MeasureNoise_R);
+    float update_KF_Try();
+    float H;
+
 #include "mode.h"
 
     Mode *flightmode;
