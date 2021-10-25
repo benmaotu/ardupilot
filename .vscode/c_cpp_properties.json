@@ -13,7 +13,8 @@
             "compilerPath": "C:\\cygwin64\\bin\\gcc.exe",
             "cStandard": "gnu17",
             "cppStandard": "gnu++14",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": "D:/ardupilot/build/sitl/compile_commands.json"
         }
     ],
     "version": 4
