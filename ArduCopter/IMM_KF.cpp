@@ -125,10 +125,18 @@ float Mu_next[5] = {0};
 //输入交互
 //
 //
+
+int i,j,k;
+float M_o[5][5];
+float X_mix[8][5];
+float P_mix[8][8][5];
+float X_l_M[8][5][5];
+
+
 float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_last[8][5],float P_last[8][8][5],float Mu_last[5])
 {
-    int i,j,k;
-    if(Mu_last[5]={0})
+    
+    if((Mu_last[0]+Mu_last[1]+Mu_last[2]+Mu_last[3]+Mu_last[4])<=0.01) //判断Mu_last是否为0
     {
         X_last[8][5] = {0};
         for(i=0;i<8;i++)
@@ -142,4 +150,80 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_l
         for(i=0;i<5;i++)
             Mu_last[i] = 0.2;
     }
+
+    //
+    //计算U_ij
+    //---------------------------------------------------------------------------------------------------
+    //定义并初始化Mu_last(N,1)*ones(1,N)及其转置矩阵
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+             M_o[i][j] = Mu_last[i];
+        }
+    }
+    
+    float M_o_Trans[5][5];
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            M_o_Trans[i][j] = M_o[j][i];
+        }
+    }
+
+    float p_dm_M_o_Trans[5][5];
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            p_dm_M_o_Trans[i][j] = prob[i][j]*M_o_Trans[i][j];
+        }
+    }
+    float p_m_M_o[5][5];
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            p_m_M_o[i][j] = prob[i][0]*M_o[0][j]+prob[i][1]*M_o[1][j]+prob[i][2]*M_o[2][j]+prob[i][3]*M_o[3][j]+prob[i][4]*M_o[4][j];
+        }
+    }
+
+    //计算U_ij
+    float U_ij[5][5];
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            U_ij[i][j] = p_dm_M_o_Trans[i][j]/p_m_M_o[i][j];
+        }
+    }
+
+    //--------------------------------------------------------------------------------------------------
+    //计算X_mix矩阵
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<8;j++)
+        {
+            for(k=0;k<5;k++)
+            {
+                X_mix[j][i] = X_last[j][k]*U_ij[i][k];
+            }
+        }
+    }
+
+    //计算矩阵P_mix
+
+    //首先计算(X_last-X_mix)
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            for(k=0;k<8;k++)
+            {
+                X_l_M[k][j][i] = X_last[k][j]-X_mix[k][i];
+            }
+        }
+    }
+
 }
