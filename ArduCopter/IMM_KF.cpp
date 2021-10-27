@@ -126,11 +126,13 @@ float Mu_next[5] = {0};
 //
 //
 
-int i,j,k;
+int i,j,k,ii;
 float M_o[5][5];
 float X_mix[8][5];
 float P_mix[8][8][5];
-float X_l_M[8][5][5];
+float x_1[8][5][5];
+float x_11[8][8][5][5];
+float P_1[8][8][5];
 
 
 float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_last[8][5],float P_last[8][8][5],float Mu_last[5])
@@ -211,6 +213,7 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_l
             }
         }
     }
+    //-------------------------------------------------------------------------------------------------
 
     //计算矩阵P_mix
 
@@ -221,9 +224,42 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_l
         {
             for(k=0;k<8;k++)
             {
-                X_l_M[k][j][i] = X_last[k][j]-X_mix[k][i];
+                x_1[k][j][i] = X_last[k][j]-X_mix[k][i];
             }
         }
     }
 
+    for(i=0;i<5;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            for(k=0;k<8;k++)
+            {
+                for(ii=0;ii<8;ii++)
+                {
+                    x_11[k][ii][j][i] = x_1[k][j][i]*x_1[ii][j][i]; //(X_last-X_mix)生成的矩阵
+                    P_1[k][ii][j] = P_last[k][ii][j]+x_11[k][ii][j][i];
+
+                    P_mix[k][ii][i] =P_mix[k][ii][i]+U_ij[i][j]*P_1[k][ii][j];
+                }
+            }
+        }
+    }
+    //-------------------------------------------------------------------------------------------------
+    //
+    //
+    //并行滤波
+    //
+    //
+    float X_pre[8][5];
+    float Uin_45[4][5];
+    float A_m_X_last[8][5];
+    for(i=0;i<8;i++) //计算A*X_last
+    {
+        for(j=0;j<5;j++)
+        {
+            A_m_X_last[i][j] = A[i][0]*X_last[0][j]+A[i][1]*X_last[1][j]+A[i][2]*X_last[2][j]+A[i][3]*X_last[3][j]+
+                               A[i][4]*X_last[4][j]+A[i][5]*X_last[5][j]+A[i][6]*X_last[6][j]+A[i][7]*X_last[7][j];
+        }
+    }
 }
