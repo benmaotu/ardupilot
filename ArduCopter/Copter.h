@@ -946,7 +946,7 @@ private:
     //IMM_KF.cpp
     float KF_Try(float ResrcData,float ProcessNoise_Q,float MeasureNoise_R);
     float update_KF_Try();
-    float H;
+    float High_kF;
     //float B_Init(float t,float b,float m,float l,float IX,float IY,float IZ,float d,float B[8][4]);
     float IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_last[8][5],float P_last[8][8][5],float Mu_last[5]);
 

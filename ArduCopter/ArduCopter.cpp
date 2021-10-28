@@ -262,7 +262,7 @@ void Copter::fast_loop()
     }
 
     //此处添加滤波器的更新
-    H = update_KF_Try()/100.0f;
+    High_kF = update_KF_Try()/100.0f;
 }
 
 // rc_loops - reads user input from transmitter/receiver
@@ -456,7 +456,7 @@ void Copter::one_hz_loop()
     update_sensor_status_flags();
 
     //向地面站发送滤波后的高度信息
-    gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",H);
+    gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",High_kF);
 }
 
 // called at 50hz

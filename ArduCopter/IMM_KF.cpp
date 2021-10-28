@@ -1,7 +1,11 @@
 #include "Copter.h"
 
+#include <cmath>
+#include <math.h>
+
 //定义矩阵运算中时间T的值
 #define T 0.0025
+#define g 9.81  //定义重力加速度
 
 float Copter::KF_Try(float ResrcData,float ProcessNoise_Q,float MeasureNoise_R)
 {   
@@ -108,12 +112,41 @@ float B[8][4] = {
         {-temp8, temp8,-temp8, temp8}
     };
 
+//计算[0,-gt,0,0,0,0,0,0]'*ones(1,5)
+float gT_o[8][5] = {
+                    {   0,   0,   0,   0,   0},
+                    {-g*T,-g*T,-g*T,-g*T,-g*T},
+                    {   0,   0,   0,   0,   0},
+                    {   0,   0,   0,   0,   0},
+                    {   0,   0,   0,   0,   0}
+    };
+
 //定义观测矩阵
 float H[4][8] = {
     {1,0,0,0,0,0,0,0},
     {0,0,1,0,0,0,0,0},
     {0,0,0,0,1,0,0,0},
     {0,0,0,0,0,0,1,0},
+};
+
+//定义过程噪声协方差矩阵
+float Q_KF[8][8] = {
+    {0.000001,0,0,0,0,0,0,0},
+    {0,0.000001,0,0,0,0,0,0},
+    {0,0,0.000000000001,0,0,0,0,0},
+    {0,0,0,0.000000000001,0,0,0,0},
+    {0,0,0,0,0.000000000001,0,0,0},
+    {0,0,0,0,0,0.000000000001,0,0},
+    {0,0,0,0,0,0,0.000000000001,0},
+    {0,0,0,0,0,0,0,0.000000000001},
+};
+
+//定义测量噪声协方差矩阵
+float R_KF[4][4] = {
+    {0.000001,0,0,0},
+    {0,0.000000000001,0,0},
+    {0,0,0.000000000001,0},
+    {0,0,0,0.000000000001}
 };
 
 //初始化X_next,P_next,Mu_next
@@ -251,8 +284,8 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_l
     //并行滤波
     //
     //
+    //------------------------------计算X_pre----------------------------------------------------------
     float X_pre[8][5];
-    float Uin_45[4][5];
     float A_m_X_last[8][5];
     for(i=0;i<8;i++) //计算A*X_last
     {
@@ -262,4 +295,148 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_l
                                A[i][4]*X_last[4][j]+A[i][5]*X_last[5][j]+A[i][6]*X_last[6][j]+A[i][7]*X_last[7][j];
         }
     }
+
+    float B_m_Uin[8];
+    for(i=0;i<8;i++) //计算B*Uin
+    {
+        B_m_Uin[i] = B[i][0]*Uin[0]+B[i][1]*Uin[1]+B[i][2]*Uin[2]+B[i][3]*Uin[3];
+    }
+
+    float B_m_Uin_o[8][5];
+    for(i=0;i<8;i++) //计算B*Uin*ones(1,5)
+    {
+        for(j=0;j<5;j++)
+        {
+            B_m_Uin_o[i][j] = B_m_Uin[i];
+        }
+    }
+
+    float diag_Uin[4][4] = {0};
+    for(i=0;i<4;i++) //计算diag(Uin)
+    {
+        diag_Uin[i][i] = Uin[i];
+    }
+
+    float diag_Uin_m_fault[4][5];
+    for(i=0;i<4;i++) //计算diag(Uin)*faultmodel(4,5)
+    {
+        for(j=0;j<5;j++)
+        {
+            diag_Uin_m_fault[i][j] = diag_Uin[i][0]*faultmodel[0][j]+diag_Uin[i][1]*faultmodel[1][j]+
+                                     diag_Uin[i][2]*faultmodel[2][j]+diag_Uin[i][3]*faultmodel[3][j];
+        }
+    }
+
+    float B_m_diag_Uin_m_fault[8][5];
+    for(i=0;i<8;i++) //计算B*diag(Uin)*faultmodel(4,5)
+    {
+        for(j=0;j<5;j++)
+        {
+            B_m_diag_Uin_m_fault[i][j] = B[i][0]*diag_Uin_m_fault[0][j]+B[i][1]*diag_Uin_m_fault[1][j]+
+                                         B[i][2]*diag_Uin_m_fault[2][j]+B[i][3]*diag_Uin_m_fault[3][j];
+        }
+    }
+
+    for(i=0;i<8;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            X_pre[i][j] = A_m_X_last[i][j]+B_m_Uin_o[i][j]-B_m_diag_Uin_m_fault[i][j]+gT_o[i][j];
+        }
+    }
+    //-----------------------------------------------------------------------------------------------
+
+    float Z_res[4][5];
+    float Zin_o[4][5];
+    float H_m_X_pre[4][5];
+    //-------------------------计算Z_res-------------------------------------------------------------
+
+    for(i=0;i<4;i++) //计算ZIn*ones(1,5)
+    {
+        for(j=0;j<5;j++)
+        {
+            Zin_o[i][j] = Zin[i];
+        }
+    }
+
+    for(i=0;i<4;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            H_m_X_pre[i][j] = H[i][0]*X_pre[0][j]+H[i][1]*X_pre[0][j]+H[i][2]*X_pre[0][j]+H[i][3]*X_pre[0][j]+
+                              H[i][4]*X_pre[0][j]+H[i][5]*X_pre[0][j]+H[i][6]*X_pre[0][j]+H[i][7]*X_pre[0][j];
+        }
+    }
+
+    for(i=0;i<4;i++)
+    {
+        for(j=0;j<5;j++)
+        {
+            Z_res[i][j] = Zin_o[i][j]-H_m_X_pre[i][j];
+        }
+    }
+    //----------------------------------计算P_pre----------------------------------------------------------
+
+    float P_pre[8][8][5] = {0};
+    float K_gain[8][4][5] = {0};
+    float mu[5] = {0};
+    float A_m_P_mix[8][8][5];
+
+    for(i=0;i<5;i++) //先计算A*P_mix(:,:,i)
+    {
+        for(j=0;j<8;j++)
+        {
+            for(k=0;k<8;k++)
+            {
+                A_m_P_mix[j][k][i] = A[j][0]*P_mix[0][k][i]+A[j][1]*P_mix[1][k][i]+A[j][2]*P_mix[2][k][i]+A[j][3]*P_mix[3][k][i]+
+                                     A[j][4]*P_mix[4][k][i]+A[j][5]*P_mix[5][k][i]+A[j][6]*P_mix[6][k][i]+A[j][7]*P_mix[7][k][i];
+            }
+        }
+    }
+
+    for(i=0;i<5;i++) //计算P_pre(:,:,i)=A*P_mix(:,:,i)*A'+Q
+    {
+        for(j=0;j<8;j++)
+        {
+            for(k=0;k<8;k++)
+            {
+               P_pre[j][k][i] = A_m_P_mix[j][0][i]*A[k][0]+A_m_P_mix[j][1][i]*A[k][1]+A_m_P_mix[j][2][i]*A[k][2]+A_m_P_mix[j][0][3]*A[k][3]+
+                                A_m_P_mix[j][4][i]*A[k][4]+A_m_P_mix[j][5][i]*A[k][5]+A_m_P_mix[j][6][i]*A[k][6]+A_m_P_mix[j][7][i]*A[k][7]+Q_KF[j][k];
+            }
+        }
+    }
+    //-------------------------------------计算S-------------------------------------------------------
+
+    float S[4][4][5]; //观测方差
+    float H_m_P_pre[4][8][5];
+
+    for(i=0;i<5;i++) //先计算H*P_pre(:,:,i)
+    {
+        for(j=0;j<4;j++)
+        {
+            for(k=0;k<8;k++)
+            {
+                H_m_P_pre[j][k][i] = H[j][0]*P_pre[0][k][i]+H[j][1]*P_pre[1][k][i]+H[j][2]*P_pre[2][k][i]+H[j][3]*P_pre[3][k][i]+
+                                     H[j][4]*P_pre[4][k][i]+H[j][5]*P_pre[5][k][i]+H[j][6]*P_pre[6][k][i]+H[j][7]*P_pre[7][k][i];
+            }
+        }
+    }
+
+    for(i=0;i<5;i++) //计算S=H*P_pre(:,:,i)*H'+R
+    {
+        for(j=0;j<4;j++)
+        {
+            for(k=0;k<4;k++)
+            {
+               S[j][k][i] = H_m_P_pre[j][0][i]*H[k][0]+H_m_P_pre[j][1][i]*H[k][1]+H_m_P_pre[j][2][i]*H[k][2]+H_m_P_pre[j][3][i]*H[k][3]+
+                            H_m_P_pre[j][4][i]*H[k][4]+H_m_P_pre[j][5][i]*H[k][5]+H_m_P_pre[j][6][i]*H[k][6]+H_m_P_pre[j][7][i]*H[k][7]+R_KF[j][k];
+            }
+        }
+    }
+    //------------------------------------------------------------------------------------------------
+
+    
+
+    //return Z_res[1][1]+S[1][1][2];
+
 }
