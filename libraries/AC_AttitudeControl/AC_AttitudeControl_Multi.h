@@ -75,6 +75,8 @@ public:
     // run lowest level body-frame rate controller and send outputs to the motors
     void rate_controller_run();
 
+    float rate_controller_run_IMM(); //为多模型滤波添加的函数
+
     // sanity check parameters.  should be called once before take-off
     void parameter_sanity_check();
 

@@ -263,6 +263,16 @@ void AC_AttitudeControl_Multi::rate_controller_run()
     control_monitor_update();
 }
 
+float AC_AttitudeControl_Multi::rate_controller_run_IMM() //为多模型滤波添加的函数
+{
+    Vector3f gyro_latest = _ahrs.get_gyro_latest();
+    float latest[3];
+    latest[0] = gyro_latest.x;
+    latest[1] = gyro_latest.y;
+    latest[2] = gyro_latest.z;
+    return *latest;
+}
+
 // sanity check parameters.  should be called once before takeoff
 void AC_AttitudeControl_Multi::parameter_sanity_check()
 {

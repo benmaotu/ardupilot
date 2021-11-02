@@ -180,6 +180,7 @@
 #endif
 
 
+
 class Copter : public AP_HAL::HAL::Callbacks {
 public:
     friend class GCS_MAVLINK_Copter;
@@ -194,6 +195,8 @@ public:
 #endif
     friend class AP_Arming_Copter;
     friend class ToyMode;
+
+    //friend class Quaternion;
 
     Copter(void);
 
@@ -302,6 +305,9 @@ private:
     // GCS selection
     GCS_Copter _gcs; // avoid using this; use gcs()
     GCS_Copter &gcs() { return _gcs; }
+
+    Quaternion quaternion;
+    //AP_AHRS_View IMM_ahrs;
 
     // User variables
 #ifdef USERHOOK_VARIABLES
@@ -948,7 +954,8 @@ private:
     float update_KF_Try();
     float High_kF;
     //float B_Init(float t,float b,float m,float l,float IX,float IY,float IZ,float d,float B[8][4]);
-    float IMM_KF(float Zin[4],float Uin[4],float X_real[8],float t,float X_last[8][5],float P_last[8][8][5],float Mu_last[5]);
+    float IMM_KF(float Zin[4],float Uin[4],float X_real[8]);
+    float IMM_KF_Update();
 
 #include "mode.h"
 
