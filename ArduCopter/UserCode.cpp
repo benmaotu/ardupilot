@@ -1,4 +1,5 @@
 #include "Copter.h"
+#define USERHOOK_MEDIUMLOOP
 
 #ifdef USERHOOK_INIT
 void Copter::userhook_init()
@@ -12,6 +13,7 @@ void Copter::userhook_init()
 void Copter::userhook_FastLoop()
 {
     // put your 100Hz code here
+    Error_Number = IMM_KF_Update();
 }
 #endif
 
@@ -19,6 +21,7 @@ void Copter::userhook_FastLoop()
 void Copter::userhook_50Hz()
 {
     // put your 50Hz code here
+    Error_Number = IMM_KF_Update();
 }
 #endif
 
@@ -26,6 +29,7 @@ void Copter::userhook_50Hz()
 void Copter::userhook_MediumLoop()
 {
     // put your 10Hz code here
+    Error_Number = IMM_KF_Update();
 }
 #endif
 

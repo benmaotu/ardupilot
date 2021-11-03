@@ -1,12 +1,12 @@
 #include "Copter.h"
 
-#include <cmath>
-#include <math.h>
+//#include <cmath>
+//#include <math.h>
 #include <AP_Math/AP_Math.h>
 #include <AP_HAL/AP_HAL.h>
 
 //定义矩阵运算中时间T的值
-#define T 0.0025
+#define T 0.1
 #define g 9.81  //定义重力加速度
 
 /*
@@ -98,7 +98,7 @@ float A[8][8] = {
 //定义系统矩阵B
 float b=175;
 float m=1.42;
-float l=0.20;
+float l=0.25;
 float IX=0.03;
 float IY=0.03;
 float IZ=0.04;
@@ -106,20 +106,20 @@ float d=4.025;
 
 float temp1 = T*T*b/(2*m);
 float temp2 = T*b/m;
-float temp3 = b*l*T*T/(2*IX);
-float temp4 = b*l*T/IX;
-float temp5 = b*l*T*T/(2*IY);
-float temp6 = b*l*T/IY;
+float temp3 = 1.414*b*l*T*T/(4*IX);
+float temp4 = 1.414*b*l*T/(2*IX);
+float temp5 = 1.414*b*l*T*T/(4*IY);
+float temp6 = 1.414*b*l*T/(2*IY);
 float temp7 = d*T*T/(2*IZ);
 float temp8 = d*T/IZ;
 
 float B[8][4] = {
-                    { temp1, temp1, temp1, temp1},
-                    { temp2, temp2, temp2, temp2},
-                    {     0,-temp3,     0, temp3},
-                    {     0,-temp4,     0, temp4},
-                    { temp5,     0,-temp5,     0},
-                    { temp6,     0,-temp6,     0},
+                    {-temp1,-temp1,-temp1,-temp1},
+                    {-temp2,-temp2,-temp2,-temp2},
+                    { temp3,-temp3,-temp3, temp3},
+                    { temp4, temp4,-temp4, temp4},
+                    {-temp5, temp5,-temp5, temp5},
+                    {-temp6, temp6,-temp6, temp6},
                     {-temp7, temp7,-temp7, temp7},
                     {-temp8, temp8,-temp8, temp8}
     };
@@ -127,7 +127,7 @@ float B[8][4] = {
 //计算[0,-gt,0,0,0,0,0,0]'*ones(1,5)
 float gT_o[8][5] = {
                     {   0,   0,   0,   0,   0},
-                    {-g*T,-g*T,-g*T,-g*T,-g*T},
+                    { g*T, g*T, g*T, g*T, g*T},
                     {   0,   0,   0,   0,   0},
                     {   0,   0,   0,   0,   0},
                     {   0,   0,   0,   0,   0}
@@ -561,12 +561,15 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8])
 
 }
 
+float Zin_R[4];
+float Uin_R[4];
+float Uin_R_PID[3];
+float X_real_R[8];
+float X_real_R_d[3];
+float error_number;
+
 float Copter::IMM_KF_Update()
 {
-    float Zin_R[4];
-    //float Uin_R[4];
-    float X_real_R[8];
-    float X_real_R_d[3];
     Zin_R[0] = barometer.get_altitude();
     Zin_R[1] = quaternion.get_euler_roll();
     Zin_R[2] = quaternion.get_euler_pitch();
@@ -582,8 +585,19 @@ float Copter::IMM_KF_Update()
     X_real_R[6] = quaternion.get_euler_yaw();
     X_real_R[7] = X_real_R_d[2];
 
-    
+    *Uin_R_PID = attitude_control->rate_controller_run_IMM_PID(); //该函数自行添加，为了获取PID输入
+    Uin_R[1] = Uin_R_PID[0];
+    Uin_R[2] = Uin_R_PID[1];
+    Uin_R[3] = Uin_R_PID[2];
+    Uin_R[0] = pos_control->get_alt_error();
 
-    return Zin_R[1]+Zin_R[2]+Zin_R[3]+Zin_R[0]+X_real_R[1];
+    float Zin_Test[4] = {1.5,9.65,75.3,66};
+    float Uin_Test[4] = {12.6,8.487,0.02,41.5};
+    float X_Test[8] = {12.53,1.3,5.6,4.1,7.8,1.2,231,2};
+
+    //error_number = IMM_KF(Zin_R,Uin_R,X_real_R);
+    error_number = IMM_KF(Zin_Test,Uin_Test,X_Test);
+
+    return error_number;
 }
 

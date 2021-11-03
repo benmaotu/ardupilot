@@ -75,6 +75,8 @@
 
 #include "Copter.h"
 
+#define USERHOOK_MEDIUMLOOP
+
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
 /*
@@ -262,7 +264,8 @@ void Copter::fast_loop()
     }
 
     //此处添加滤波器的更新
-    High_kF = update_KF_Try()/100.0f;
+    //High_kF = update_KF_Try()/100.0f;
+    //Error_Number = IMM_KF_Update();
 }
 
 // rc_loops - reads user input from transmitter/receiver
@@ -456,7 +459,8 @@ void Copter::one_hz_loop()
     update_sensor_status_flags();
 
     //向地面站发送滤波后的高度信息
-    gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",High_kF);
+    //gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",High_kF);
+    gcs().send_text(MAV_SEVERITY_CRITICAL,"Error Model: %.2f",Error_Number);
 }
 
 // called at 50hz

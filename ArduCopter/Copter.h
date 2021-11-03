@@ -956,6 +956,7 @@ private:
     //float B_Init(float t,float b,float m,float l,float IX,float IY,float IZ,float d,float B[8][4]);
     float IMM_KF(float Zin[4],float Uin[4],float X_real[8]);
     float IMM_KF_Update();
+    float Error_Number = 3.3;
 
 #include "mode.h"
 

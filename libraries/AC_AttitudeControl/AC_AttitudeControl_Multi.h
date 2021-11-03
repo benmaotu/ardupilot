@@ -76,6 +76,7 @@ public:
     void rate_controller_run();
 
     float rate_controller_run_IMM(); //为多模型滤波添加的函数
+    float rate_controller_run_IMM_PID(); //为多模型滤波添加的函数
 
     // sanity check parameters.  should be called once before take-off
     void parameter_sanity_check();
