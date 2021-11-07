@@ -249,12 +249,17 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8])
                 X_last[j][i]= {0};
             }
         }
-        for(i=0;i<8;i++)
+        for(i=0;i<5;i++)
         {
             for(j=0;j<8;j++)
             {
-                for(k=0;k<5;k++)
-                    P_last[i][j][k] = 1;
+                for(k=0;k<8;k++)
+                {
+                    if(j==k)
+                        P_last[j][k][i] = 1;
+                    else
+                        P_last[j][k][i] = 0;
+               }
             }
         }
         for(i=0;i<5;i++)
@@ -365,7 +370,7 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8])
         {
             for(k=0;k<8;k++)
             {
-               P_pre[j][k][i] = A_m_P_last[j][0][i]*A[k][0]+A_m_P_last[j][1][i]*A[k][1]+A_m_P_last[j][2][i]*A[k][2]+A_m_P_last[j][0][3]*A[k][3]+
+               P_pre[j][k][i] = A_m_P_last[j][0][i]*A[k][0]+A_m_P_last[j][1][i]*A[k][1]+A_m_P_last[j][2][i]*A[k][2]+A_m_P_last[j][3][i]*A[k][3]+
                                 A_m_P_last[j][4][i]*A[k][4]+A_m_P_last[j][5][i]*A[k][5]+A_m_P_last[j][6][i]*A[k][6]+A_m_P_last[j][7][i]*A[k][7]+Q_KF[j][k];
             }
         }
@@ -537,6 +542,7 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8])
         for(i=0;i<5;i++)
         {
             Mu_next[i] = 0.2;
+            //gcs().send_text(MAV_SEVERITY_CRITICAL,"Error Model: %.2f",Mu_next[i]);
         }
     }
     //----------------------------------------------------------------------------------------
@@ -591,12 +597,12 @@ float Copter::IMM_KF_Update()
     Uin_R[3] = Uin_R_PID[2];
     Uin_R[0] = pos_control->get_alt_error();
 
-    float Zin_Test[4] = {1.5,9.65,75.3,66};
-    float Uin_Test[4] = {12.6,8.487,0.02,41.5};
-    float X_Test[8] = {12.53,1.3,5.6,4.1,7.8,1.2,231,2};
+    //float Zin_Test[4] = {1.5,9.65,75.3,66};
+    //float Uin_Test[4] = {12.6,8.487,0.02,41.5};
+    //float X_Test[8] = {12.53,1.3,5.6,4.1,7.8,1.2,231,2};
 
-    //error_number = IMM_KF(Zin_R,Uin_R,X_real_R);
-    error_number = IMM_KF(Zin_Test,Uin_Test,X_Test);
+    error_number = IMM_KF(Zin_R,Uin_R,X_real_R);
+    //error_number = IMM_KF(Zin_Test,Uin_Test,X_Test);
 
     return error_number;
 }
