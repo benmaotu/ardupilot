@@ -4,10 +4,12 @@
 //#include <math.h>
 #include <AP_Math/AP_Math.h>
 #include <AP_HAL/AP_HAL.h>
+//#include "AP_MotorsMatrix.h"
 
 //定义矩阵运算中时间T的值
 #define T 0.1
 #define g 9.81  //定义重力加速度
+
 
 /*
 float get_euler_roll();
@@ -545,6 +547,14 @@ float Copter::IMM_KF(float Zin[4],float Uin[4],float X_real[8])
             //gcs().send_text(MAV_SEVERITY_CRITICAL,"Error Model: %.2f",Mu_next[i]);
         }
     }
+    ///*
+    hal.console->printf("%f\n",Mu_next[0]);
+    hal.console->printf("%f\n",Mu_next[1]);
+    hal.console->printf("%f\n",Mu_next[2]);
+    hal.console->printf("%f\n",Mu_next[3]);
+    hal.console->printf("%f\n",Mu_next[4]);
+    hal.console->printf("\n");
+    //*/
     //----------------------------------------------------------------------------------------
     if(Mu_next[0]>0.5)
         IMM_Model = 0;
@@ -573,6 +583,9 @@ float Uin_R_PID[3];
 float X_real_R[8];
 float X_real_R_d[3];
 float error_number;
+int16_t Uin_R_motor[AP_MOTORS_MAX_NUM_MOTORS];
+int T_U = 0;
+int16_t M_U;
 
 float Copter::IMM_KF_Update()
 {
@@ -590,12 +603,22 @@ float Copter::IMM_KF_Update()
     X_real_R[5] = X_real_R_d[1];
     X_real_R[6] = quaternion.get_euler_yaw();
     X_real_R[7] = X_real_R_d[2];
+    
+    //*Uin_R_PID = attitude_control->rate_controller_run_IMM_PID(); //该函数自行添加，为了获取PID输入
+    //Uin_R[1] = Uin_R_PID[0];
+    //Uin_R[2] = Uin_R_PID[1];
+    //Uin_R[3] = Uin_R_PID[2];
+    //Uin_R[0] = pos_control->get_alt_error();
 
-    *Uin_R_PID = attitude_control->rate_controller_run_IMM_PID(); //该函数自行添加，为了获取PID输入
-    Uin_R[1] = Uin_R_PID[0];
-    Uin_R[2] = Uin_R_PID[1];
-    Uin_R[3] = Uin_R_PID[2];
-    Uin_R[0] = pos_control->get_alt_error();
+    //float Uin_R[4] = {1920,1865,1964,1996};
+
+    Uin_R[0] = Uin_R_0_IMM;
+    Uin_R[1] = Uin_R_1_IMM;
+    Uin_R[2] = Uin_R_2_IMM;
+    Uin_R[3] = Uin_R_3_IMM;
+
+    //hal.console->printf("%f\n",Uin_R[0]);
+    
 
     //float Zin_Test[4] = {1.5,9.65,75.3,66};
     //float Uin_Test[4] = {12.6,8.487,0.02,41.5};

@@ -37,6 +37,8 @@ public:
     // output_to_motors - sends minimum values out to the motors
     void                output_to_motors();
 
+    int16_t                output_to_motors_IMM_KF();//(int16_t output_IMM_kf[AP_MOTORS_MAX_NUM_MOTORS]);
+
     // get_motor_mask - returns a bitmask of which outputs are being used for motors (1 means being used)
     //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict
     uint16_t            get_motor_mask() override;

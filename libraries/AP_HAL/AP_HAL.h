@@ -30,3 +30,8 @@
 #include "HAL.h"
 
 #include "system.h"
+
+extern int16_t Uin_R_0_IMM;
+extern int16_t Uin_R_1_IMM;
+extern int16_t Uin_R_2_IMM;
+extern int16_t Uin_R_3_IMM;

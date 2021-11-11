@@ -190,6 +190,8 @@ public:
     friend class ParametersG2;
     friend class AP_Avoidance_Copter;
 
+    friend class AP_MotorsMatrix;
+
 #if ADVANCED_FAILSAFE == ENABLED
     friend class AP_AdvancedFailsafe_Copter;
 #endif
@@ -308,6 +310,7 @@ private:
 
     Quaternion quaternion;
     //AP_AHRS_View IMM_ahrs;
+    AP_MotorsMatrix *motor_IMM_KF; //为多模型滤波添加的获取转速pwm的对象
 
     // User variables
 #ifdef USERHOOK_VARIABLES

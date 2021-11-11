@@ -103,6 +103,8 @@ class GCS_MAVLINK
 {
 public:
     friend class GCS;
+
+    friend class AP_MotorsMatrix;
     GCS_MAVLINK();
     void        update(uint32_t max_time_us=1000);
     void        init(AP_HAL::UARTDriver *port, mavlink_channel_t mav_chan);

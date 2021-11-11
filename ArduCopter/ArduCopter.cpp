@@ -460,7 +460,8 @@ void Copter::one_hz_loop()
 
     //向地面站发送滤波后的高度信息
     //gcs().send_text(MAV_SEVERITY_CRITICAL,"Current altitude: %.2fm",High_kF);
-    gcs().send_text(MAV_SEVERITY_CRITICAL,"Error Model: %.2f",Error_Number);
+    gcs().send_text(MAV_SEVERITY_CRITICAL,"Error Model= %.2f",Error_Number);
+    //gcs().send_text(MAV_SEVERITY_CRITICAL,"PWM: %.2f",Uin_R_motor[1]);
 }
 
 // called at 50hz

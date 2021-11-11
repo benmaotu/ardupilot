@@ -23,6 +23,11 @@
 
 extern const AP_HAL::HAL& hal;
 
+int16_t Uin_R_0_IMM;
+int16_t Uin_R_1_IMM;
+int16_t Uin_R_2_IMM;
+int16_t Uin_R_3_IMM;
+
 // init
 void AP_MotorsMatrix::init(motor_frame_class frame_class, motor_frame_type frame_type)
 {
@@ -109,6 +114,13 @@ void AP_MotorsMatrix::output_to_motors()
             break;
     }
 
+    Uin_R_0_IMM = motor_out[0];
+    Uin_R_1_IMM = motor_out[1];
+    Uin_R_2_IMM = motor_out[2];
+    Uin_R_3_IMM = motor_out[3];
+
+    //hal.console->printf("%d",motor_out[5]);
+
     // send output to each motor
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
@@ -117,6 +129,53 @@ void AP_MotorsMatrix::output_to_motors()
     }
 }
 
+int16_t AP_MotorsMatrix::output_to_motors_IMM_KF(void)//(int16_t output_IMM_kf[AP_MOTORS_MAX_NUM_MOTORS])
+ {
+    int8_t i;
+    int16_t motor_out[AP_MOTORS_MAX_NUM_MOTORS];    // final pwm values sent to the motor
+
+    switch (_spool_mode) {
+        case SHUT_DOWN: {
+            // sends minimum values out to the motors
+            // set motor output based on thrust requests
+            for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
+                if (motor_enabled[i]) {
+                    if (_disarm_disable_pwm && _disarm_safety_timer == 0 && !armed()) {
+                        motor_out[i] = 0;
+                    } else {
+                        motor_out[i] = get_pwm_output_min();
+                    }
+                }
+            }
+            break;
+        }
+        case SPIN_WHEN_ARMED:
+            // sends output to motors when armed but not flying
+            for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
+                if (motor_enabled[i]) {
+                    motor_out[i] = calc_spin_up_to_pwm();
+                }
+            }
+            break;
+        case SPOOL_UP:
+        case THROTTLE_UNLIMITED:
+        case SPOOL_DOWN:
+            // set motor output based on thrust requests
+            for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
+                if (motor_enabled[i]) {
+                    motor_out[i] = calc_thrust_to_pwm(_thrust_rpyt_out[i]);
+                }
+            }
+            break;
+    }
+    /*
+    for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++)
+    {
+        output_IMM_kf[i] = motor_out[i];
+    }
+    */
+   return *motor_out;
+ }
 
 // get_motor_mask - returns a bitmask of which outputs are being used for motors (1 means being used)
 //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict
