@@ -991,6 +991,14 @@ private:
 #else
     ModeStabilize mode_stabilize;
 #endif
+
+/*-------------------------------------添加自定义模式-------------------------------------------------*/
+
+
+    ModeFaultTolerant mode_faulttolerant;
+
+
+/*---------------------------------------------------------------------------------------------------*/
 #if MODE_SPORT_ENABLED == ENABLED
     ModeSport mode_sport;
 #endif

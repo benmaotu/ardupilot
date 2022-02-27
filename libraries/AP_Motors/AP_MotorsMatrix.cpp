@@ -311,6 +311,7 @@ void AP_MotorsMatrix::add_motor_raw(int8_t motor_num, float roll_fac, float pitc
     if( motor_num >= 0 && motor_num < AP_MOTORS_MAX_NUM_MOTORS ) {
 
         // increment number of motors if this motor is being newly motor_enabled
+        //如果该电机是新启用的电机，则增加电机数量   2022.02.25注
         if( !motor_enabled[motor_num] ) {
             motor_enabled[motor_num] = true;
         }
@@ -327,6 +328,33 @@ void AP_MotorsMatrix::add_motor_raw(int8_t motor_num, float roll_fac, float pitc
         add_motor_num(motor_num);
     }
 }
+/*----------------------------------------为倾斜旋翼添加电机分配函数   2022.02.26注------------------------------------*/
+void AP_MotorsMatrix::add_motor_raw_for_tilted(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order)
+{
+    //cos(0.105) = 0.994  sin(0.105) = 0.105
+    
+    // ensure valid motor number is provided
+    if( motor_num >= 0 && motor_num < AP_MOTORS_MAX_NUM_MOTORS ) {
+
+        // increment number of motors if this motor is being newly motor_enabled
+        //如果该电机是新启用的电机，则增加电机数量   2022.02.25注
+        if( !motor_enabled[motor_num] ) {
+            motor_enabled[motor_num] = true;
+        }
+
+        // set roll, pitch, thottle factors and opposite motor (for stability patch)
+        _roll_factor[motor_num] = roll_fac * 0.994 - yaw_fac * 0.105;
+        _pitch_factor[motor_num] = pitch_fac;
+        _yaw_factor[motor_num] = yaw_fac * 0.994 + roll_fac * 0.105;
+
+        // set order that motor appears in test
+        _test_order[motor_num] = testing_order;
+
+        // call parent class method
+        add_motor_num(motor_num);
+    }
+}
+/*------------------------------------------------------------------------------------------------------------------*/
 
 // add_motor using just position and prop direction - assumes that for each motor, roll and pitch factors are equal
 void AP_MotorsMatrix::add_motor(int8_t motor_num, float angle_degrees, float yaw_factor, uint8_t testing_order)
