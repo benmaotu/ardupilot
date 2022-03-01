@@ -1,4 +1,5 @@
 #include "Copter.h"
+#include <GCS_MAVLink/GCS.h>
 
 #define ARM_DELAY               20  // called at 10hz so 2 seconds
 #define DISARM_DELAY            20  // called at 10hz so 2 seconds
@@ -294,6 +295,12 @@ void Copter::init_disarm_motors()
     ap.in_arming_delay = false;
 }
 
+/*---------------------------------------------------------------------------------------------------------------------*/
+int8_t fault_injection_a = 1;//故障注入使用到的参数
+                             //切换到容错模式时，此参数为0，否则此参数为1
+                             //当此参数为0时，在AP_MotorsMatrix.cpp中停转5号电机
+/*---------------------------------------------------------------------------------------------------------------------*/
+
 // motors_output - send output to motors library which will adjust and send to ESCs and servos
 void Copter::motors_output()
 {
@@ -306,6 +313,18 @@ void Copter::motors_output()
         return;
     }
 #endif
+
+/*--------------------------------------------------------------------------------------------------------------------------------*/
+    if(flightmode == &mode_faulttolerant && fault_injection_a == 1){
+        fault_injection_a = 0;
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "hello world!");
+
+    }
+    if(flightmode != &mode_faulttolerant){
+        fault_injection_a = 1;
+    }
+
+/*--------------------------------------------------------------------------------------------------------------------------------*/
 
     // Update arming delay state
     if (ap.in_arming_delay && (!motors->armed() || millis()-arm_time_ms > ARMING_DELAY_SEC*1.0e3f || control_mode == THROW)) {

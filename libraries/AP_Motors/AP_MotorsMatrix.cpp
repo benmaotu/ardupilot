@@ -21,6 +21,8 @@
 #include <AP_HAL/AP_HAL.h>
 #include "AP_MotorsMatrix.h"
 
+#include <GCS_MAVLink/GCS.h>
+
 extern const AP_HAL::HAL& hal;
 
 // init
@@ -108,6 +110,12 @@ void AP_MotorsMatrix::output_to_motors()
             }
             break;
     }
+
+    /*---------------------------------20220228----------------------------------------------------------------*/
+    if(fault_injection_a == 0){
+        motor_out[4] = 0;//故障注入，停转5号电机
+    }
+    /*---------------------------------------------------------------------------------------------------------*/
 
     // send output to each motor
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
@@ -707,6 +715,8 @@ void AP_MotorsMatrix::normalise_rpy_factors()
     float yaw_fac = 0.0f;
 
     // find maximum roll, pitch and yaw factors
+
+    /*---------------------------------fabsf表示取绝对值---------------------------------20220227注--------------------*/
     for (uint8_t i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             if (roll_fac < fabsf(_roll_factor[i])) {

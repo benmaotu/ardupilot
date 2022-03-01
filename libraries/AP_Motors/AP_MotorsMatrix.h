@@ -7,6 +7,8 @@
 #include <RC_Channel/RC_Channel.h>     // RC Channel Library
 #include "AP_MotorsMulticopter.h"
 
+extern int8_t fault_injection_a;
+
 #define AP_MOTORS_MATRIX_YAW_FACTOR_CW   -1
 #define AP_MOTORS_MATRIX_YAW_FACTOR_CCW   1
 
@@ -41,6 +43,9 @@ public:
     //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict
     uint16_t            get_motor_mask() override;
 
+    // remove_motor
+    void                remove_motor(int8_t motor_num);
+
 protected:
     // output - sends commands to the motors
     void                output_armed_stabilizing();
@@ -58,8 +63,7 @@ protected:
     // add_motor using separate roll and pitch factors (for asymmetrical frames) and prop direction
     void                add_motor(int8_t motor_num, float roll_factor_in_degrees, float pitch_factor_in_degrees, float yaw_factor, uint8_t testing_order);
 
-    // remove_motor
-    void                remove_motor(int8_t motor_num);
+    
 
     // configures the motors for the defined frame_class and frame_type
     virtual void        setup_motors(motor_frame_class frame_class, motor_frame_type frame_type);

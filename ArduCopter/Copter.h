@@ -180,6 +180,7 @@
 #endif
 
 
+
 class Copter : public AP_HAL::HAL::Callbacks {
 public:
     friend class GCS_MAVLINK_Copter;
@@ -836,6 +837,10 @@ private:
     void init_disarm_motors();
     void motors_output();
     void lost_vehicle_check();
+
+    /*----------------------------------------------------------------------------------------------------------------------*/
+    friend class AP_MotorsMatrix;
+    /*----------------------------------------------------------------------------------------------------------------------*/
 
     // navigation.cpp
     void run_nav_updates(void);
