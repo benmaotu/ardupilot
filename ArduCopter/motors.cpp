@@ -317,7 +317,7 @@ void Copter::motors_output()
 /*--------------------------------------------------------------------------------------------------------------------------------*/
     if(flightmode == &mode_faulttolerant && fault_injection_a == 1){
         fault_injection_a = 0;
-        gcs().send_text(MAV_SEVERITY_CRITICAL, "hello world!");
+        
 
     }
     if(flightmode != &mode_faulttolerant){

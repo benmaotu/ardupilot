@@ -54,7 +54,7 @@ protected:
     void                add_motor_raw(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order);
 
     /*------------------------------------------声明倾斜旋翼电机分配--------------------------------------------------------*/
-    void                add_motor_raw_for_tilted(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order);
+    void                add_motor_raw_for_tilted(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order,float f_allocate_factor);
     /*--------------------------------------------------------------------------------------------------------------------*/
     
     // add_motor using just position and yaw_factor (or prop direction)

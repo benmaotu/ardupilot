@@ -24,6 +24,8 @@
 #include <GCS_MAVLink/GCS.h>
 
 extern const AP_HAL::HAL& hal;
+extern int8_t fault_injection_a;
+
 
 // init
 void AP_MotorsMatrix::init(motor_frame_class frame_class, motor_frame_type frame_type)
@@ -199,6 +201,29 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
     // calculate roll and pitch for each motor
     // calculate the amount of yaw input that each motor can accept
+
+    /*--------------------------------------------------------------------------------------------------------------------------------*/
+    /*-----------------------------------修改2号旋翼倾斜后的控制分配------------------------------------------------------------*/
+    /*-----------------------------------------------------------------------------------------------------------------------*/
+    if(fault_injection_a == 0){
+        _roll_factor[1] = 0.5*0.994-0.5*0.105;
+        _yaw_factor[0] = -0.455;
+        _yaw_factor[1] = 0.5;
+        _yaw_factor[2] = -0.455;
+        _yaw_factor[3] = 0.455;
+        _yaw_factor[4] = 0.455;
+        _yaw_factor[5] = -0.455;
+    }else{
+        _roll_factor[1] = 0.5;
+        _yaw_factor[0] = -0.5;
+        _yaw_factor[1] = 0.5;
+        _yaw_factor[2] = -0.5;
+        _yaw_factor[3] = 0.5;
+        _yaw_factor[4] = 0.5;
+        _yaw_factor[5] = -0.5;
+    }
+    /*--------------------------------------------------------------------------------------------------------------------------------*/
+
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
         if (motor_enabled[i]) {
             _thrust_rpyt_out[i] = roll_thrust * _roll_factor[i] + pitch_thrust * _pitch_factor[i];
@@ -217,6 +242,9 @@ void AP_MotorsMatrix::output_armed_stabilizing()
             }
         }
     }
+
+    //gcs().send_text(MAV_SEVERITY_CRITICAL, "%f,%f,%f,%f,%f,%f",_yaw_factor[0],_yaw_factor[1],_yaw_factor[2],_yaw_factor[3],_yaw_factor[4],_yaw_factor[5]);
+
 
     // todo: make _yaw_headroom 0 to 1
     yaw_allowed = MAX(yaw_allowed, (float)_yaw_headroom/1000.0f);
@@ -337,9 +365,11 @@ void AP_MotorsMatrix::add_motor_raw(int8_t motor_num, float roll_fac, float pitc
     }
 }
 /*----------------------------------------为倾斜旋翼添加电机分配函数   2022.02.26注------------------------------------*/
-void AP_MotorsMatrix::add_motor_raw_for_tilted(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order)
+void AP_MotorsMatrix::add_motor_raw_for_tilted(int8_t motor_num, float roll_fac, float pitch_fac, float yaw_fac, uint8_t testing_order,float f_allocate_factor)
 {
     //cos(0.105) = 0.994  sin(0.105) = 0.105
+    float a;
+    a = f_allocate_factor;
     
     // ensure valid motor number is provided
     if( motor_num >= 0 && motor_num < AP_MOTORS_MAX_NUM_MOTORS ) {
@@ -351,9 +381,11 @@ void AP_MotorsMatrix::add_motor_raw_for_tilted(int8_t motor_num, float roll_fac,
         }
 
         // set roll, pitch, thottle factors and opposite motor (for stability patch)
-        _roll_factor[motor_num] = roll_fac * 0.994 - yaw_fac * 0.105;
+        //_roll_factor[motor_num] = roll_fac * 0.994 - yaw_fac * 0.105;
+        _roll_factor[motor_num] = roll_fac * cosf(a) - yaw_fac * sinf(a);
         _pitch_factor[motor_num] = pitch_fac;
-        _yaw_factor[motor_num] = yaw_fac * 0.994 + roll_fac * 0.105;
+        //_yaw_factor[motor_num] = yaw_fac * 0.994 + roll_fac * 0.105;
+        _yaw_factor[motor_num] = yaw_fac * cosf(a) + roll_fac * sinf(a);
 
         // set order that motor appears in test
         _test_order[motor_num] = testing_order;
@@ -498,6 +530,7 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                 case MOTOR_FRAME_TYPE_X:
                     add_motor(AP_MOTORS_MOT_1,  90, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
                     add_motor(AP_MOTORS_MOT_2, -90, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5);
+                    //add_motor_raw_for_tilted(AP_MOTORS_MOT_2, 1, 0, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5, FFT.fault_tolerant_factor);
                     add_motor(AP_MOTORS_MOT_3, -30, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  6);
                     add_motor(AP_MOTORS_MOT_4, 150, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 3);
                     add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
