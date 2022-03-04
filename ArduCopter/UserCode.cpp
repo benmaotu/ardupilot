@@ -29,7 +29,7 @@ void Copter::userhook_50Hz()
 void Copter::userhook_MediumLoop()
 {
     // put your 10Hz code here
-    Error_Number = IMM_KF_Update();
+    IMM_KF_Update();
 }
 #endif
 

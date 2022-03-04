@@ -309,6 +309,7 @@ private:
     GCS_Copter &gcs() { return _gcs; }
 
     Quaternion quaternion;
+    AP_AHRS *GTA;
     //AP_AHRS_View IMM_ahrs;
     AP_MotorsMatrix *motor_IMM_KF; //为多模型滤波添加的获取转速pwm的对象
 
@@ -958,7 +959,7 @@ private:
     float High_kF;
     //float B_Init(float t,float b,float m,float l,float IX,float IY,float IZ,float d,float B[8][4]);
     float IMM_KF(float Zin[4],float Uin[4],float X_real[8]);
-    float IMM_KF_Update();
+    void IMM_KF_Update();
     float Error_Number = 3.3;
 
 #include "mode.h"

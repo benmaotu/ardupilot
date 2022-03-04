@@ -51,6 +51,7 @@ class AP_AHRS
 {
 public:
     friend class AP_AHRS_View;
+    friend class Copter;
     
     // Constructor
     AP_AHRS() :

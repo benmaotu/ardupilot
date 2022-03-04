@@ -25,7 +25,8 @@
         "xutility": "cpp",
         "iosfwd": "cpp",
         "ratio": "cpp",
-        "dense": "cpp"
+        "dense": "cpp",
+        "*.tcc": "cpp"
     },
     // 切换到当前工作目录
     "terminal.integrated.env.windows": {

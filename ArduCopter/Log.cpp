@@ -155,6 +155,11 @@ void Copter::Log_Write_Control_Tuning()
 void Copter::Log_Write_Attitude()
 {
     Vector3f targets = attitude_control->get_att_target_euler_cd();
+
+    //hal.console->printf("%f\n",targets.x);
+    //hal.console->printf("%f\n",targets.y);
+    //hal.console->printf("%f\n",targets.z);
+
     targets.z = wrap_360_cd(targets.z);
     DataFlash.Log_Write_Attitude(ahrs, targets);
     DataFlash.Log_Write_Rate(ahrs, *motors, *attitude_control, *pos_control);

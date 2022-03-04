@@ -263,15 +263,16 @@ void AC_AttitudeControl_Multi::rate_controller_run()
     control_monitor_update();
 }
 
-float AC_AttitudeControl_Multi::rate_controller_run_IMM() //为多模型滤波添加的函数
+Vector3f AC_AttitudeControl_Multi::rate_controller_run_IMM() //为多模型滤波添加的函数
 {
-    float latest[3];
+    //float latest[3];
+
     Vector3f gyro_latest = _ahrs.get_gyro_latest();
     
-    latest[0] = gyro_latest.x;//获取当前角度
-    latest[1] = gyro_latest.y;
-    latest[2] = gyro_latest.z;
-    return *latest;
+    //latest[0] = gyro_latest.x;//获取当前角度
+    //latest[1] = gyro_latest.y;
+    //latest[2] = gyro_latest.z;
+    return gyro_latest;
 }
 
 float AC_AttitudeControl_Multi::rate_controller_run_IMM_PID() //为多模型滤波添加的函数,获取输入Uin

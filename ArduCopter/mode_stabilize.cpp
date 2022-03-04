@@ -56,4 +56,6 @@ void Copter::ModeStabilize::run()
 
     // output pilot's throttle
     attitude_control->set_throttle_out(pilot_throttle_scaled, true, g.throttle_filt);
+
+    
 }
