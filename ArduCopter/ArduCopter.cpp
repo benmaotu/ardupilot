@@ -75,6 +75,8 @@
 
 #include "Copter.h"
 
+#define USERHOOK_FASTLOOP
+
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
 /*

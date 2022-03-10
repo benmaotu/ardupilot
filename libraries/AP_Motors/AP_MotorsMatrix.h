@@ -14,6 +14,7 @@
 class AP_MotorsMatrix : public AP_MotorsMulticopter {
 public:
 
+    friend class Copter;
     /// Constructor
     AP_MotorsMatrix(uint16_t loop_rate, uint16_t speed_hz = AP_MOTORS_SPEED_DEFAULT) :
         AP_MotorsMulticopter(loop_rate, speed_hz)
@@ -36,6 +37,12 @@ public:
 
     // output_to_motors - sends minimum values out to the motors
     void                output_to_motors();
+
+    //为故障诊断添加函数，以获取输入到电机的pwm值------------------------------------------------------------------------------------------
+
+    void                output_to_motors_IMM(float a[6]);
+
+    //----------------------------------------------------------------------------------------------------------------------------------
 
     // get_motor_mask - returns a bitmask of which outputs are being used for motors (1 means being used)
     //  this can be used to ensure other pwm outputs (i.e. for servos) do not conflict

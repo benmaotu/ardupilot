@@ -217,6 +217,14 @@ private:
     // AP_Notify instance
     AP_Notify notify;
 
+    /*-------------------------------------------------------------------------------------------------------------------*/
+
+    void State_refresh();
+    int IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4]);
+    float get_mat_det(float a[4][4]);
+
+    /*-------------------------------------------------------------------------------------------------------------------*/
+
     // used to detect MAVLink acks from GCS to stop compassmot
     uint8_t command_ack_counter;
 

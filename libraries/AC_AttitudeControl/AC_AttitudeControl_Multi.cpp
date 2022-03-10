@@ -263,6 +263,14 @@ void AC_AttitudeControl_Multi::rate_controller_run()
     control_monitor_update();
 }
 
+/*-------------------------------------------------------------------------------------------------------------------------*/
+Vector3f AC_AttitudeControl_Multi::rate_controller_run_IMM()
+{
+    Vector3f gyro_latest = _ahrs.get_gyro_latest();
+    return gyro_latest;
+}
+/*-------------------------------------------------------------------------------------------------------------------------*/
+
 // sanity check parameters.  should be called once before takeoff
 void AC_AttitudeControl_Multi::parameter_sanity_check()
 {

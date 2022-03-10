@@ -1,5 +1,7 @@
 #include "Copter.h"
 
+#define USERHOOK_FASTLOOP
+
 #ifdef USERHOOK_INIT
 void Copter::userhook_init()
 {
@@ -9,9 +11,9 @@ void Copter::userhook_init()
 #endif
 
 #ifdef USERHOOK_FASTLOOP
-void Copter::userhook_FastLoop()
+void Copter::userhook_FastLoop()//100Hz循环
 {
-    // put your 100Hz code here
+    State_refresh();
 }
 #endif
 

@@ -24,7 +24,11 @@
         "xstring": "cpp",
         "xutility": "cpp",
         "iosfwd": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "cmath": "cpp",
+        "*.tcc": "cpp",
+        "iostream": "cpp",
+        "*.idl": "cpp"
     },
     // 切换到当前工作目录
     "terminal.integrated.env.windows": {
