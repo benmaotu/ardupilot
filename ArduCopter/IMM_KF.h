@@ -2,7 +2,7 @@
 #include "math.h"
 #include <GCS_MAVLink/GCS.h>
 
-float T = 0.01;                //定义函数运行周期，将函数放入100Hz循环
+float T = 0.303;                //定义函数运行周期，将函数放入100Hz循环//3.3Hz
 //float kt = 9.122e-6;            //定义无人机升力系数
 //float kq = 1.133e-7;            //定义无人机反扭力系数
 float kt = 1.308e-6;
@@ -185,7 +185,7 @@ float z_res_4[4];float z_res_5[4];float z_res_6[4];
 
 float S_0[4][4],S_1[4][4],S_2[4][4],S_3[4][4],S_4[4][4],S_5[4][4],S_6[4][4];
 
-int8_t model_number;
+int8_t model_number = 10;
 
 
 

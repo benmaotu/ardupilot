@@ -3,11 +3,12 @@
 float U_IMM[6];
 float x_IMM[8];
 float Z_IMM[4];
+int8_t number_IMM;
 
 void Copter::State_refresh(){
     float z,phi,theta,psai;
     float z_dot,phi_dot,theta_dot,psai_dot;
-    int8_t number_IMM;
+    
 
     z     = inertial_nav.get_altitude();
     phi   = attitude_control->get_att_target_euler_cd().x;
@@ -38,17 +39,19 @@ void Copter::State_refresh(){
 
     //hal.console->printf("%.4f,%.4f,%.4f\n",x_IMM[2],x_IMM[4],x_IMM[6]);
 
-    float x_1_IMM[8] = {5, 0, 0, 0, 0, 0, 0, 0};
+    /* float x_1_IMM[8] = {5, 0, 0, 0, 0, 0, 0, 0};
     float U_1_IMM[6] = {1560,1560,1560,1560,1560,1560};
-    float Z_1_IMM[4] = {5, 0, 0, 0};
-    number_IMM = IMM_Kalman_Filter(x_1_IMM,U_1_IMM,Z_1_IMM);
-    hal.console->printf("%d",number_IMM);
+    float Z_1_IMM[4] = {5, 0, 0, 0}; */
+    hal.console->printf("bbb\n");
+    //hal.console->printf("%d",number_IMM);
+    //IMM_Kalman_Filter(x_1_IMM,U_1_IMM,Z_1_IMM);
 
-    /* if(x_IMM[0]>3.0f){
+    if(x_IMM[0]>3.0f){
         number_IMM = IMM_Kalman_Filter(x_IMM,U_IMM,Z_IMM);
 
-        hal.console->printf("%d",number_IMM);
-    } */
+        hal.console->printf("%d\n",number_IMM);
+        
+    }
 
 }
 
@@ -100,6 +103,7 @@ float Copter::get_mat_det(float a[4][4])
 //交互式多模型卡尔曼滤波函数
 int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
 {
+    hal.console->printf("aaa\n");
     //初次运行时的初始化
     if(Mu_last[0]+Mu_last[1]+Mu_last[2]+Mu_last[3]+Mu_last[4]+Mu_last[5]+Mu_last[6] <0.1 ){
         for(i=0;i<8;i++){
@@ -123,7 +127,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             Mu_last[i] = 0.143;
         }
     }
-
+    
     //
     //计算uij----------------------------------------------------------------------------------------------------------------
     //
@@ -132,16 +136,22 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
            u_i_j[i][j] = p_i_j[i][j]*Mu_last[i]/(p_i_j[0][j]*Mu_last[0]+p_i_j[1][j]*Mu_last[1]+p_i_j[2][j]*Mu_last[2]+
                                                  p_i_j[3][j]*Mu_last[3]+p_i_j[4][j]*Mu_last[4]+p_i_j[5][j]*Mu_last[5]+
                                                  p_i_j[6][j]*Mu_last[6]);
+       //hal.console->printf("%.4f,  ",u_i_j[i][j]);     
        }
+       //hal.console->printf("%.4f,  ",Mu_last[j]);
+       //hal.console->printf("\n");
    }
     //-----------------------------------------------------输入交互-----------------------------------------------------------------
 
     for(i=0;i<7;i++){
         x_mix_0[i] = x_last_0[i]*u_i_j[0][0] +x_last_1[i]*u_i_j[1][0] +x_last_2[i]*u_i_j[2][0] +x_last_3[i]*u_i_j[3][0] +
                      x_last_4[i]*u_i_j[4][0] +x_last_5[i]*u_i_j[5][0] +x_last_6[i]*u_i_j[6][0];
+        //hal.console->printf("%.4f,  ",x_mix_0[i]);
 
         x_mix_1[i] = x_last_0[i]*u_i_j[0][1] +x_last_1[i]*u_i_j[1][1] +x_last_2[i]*u_i_j[2][1] +x_last_3[i]*u_i_j[3][1] +
                      x_last_4[i]*u_i_j[4][1] +x_last_5[i]*u_i_j[5][1] +x_last_6[i]*u_i_j[6][1];
+        //hal.console->printf("%.4f,  ",x_mix_1[i]);
+
 
         x_mix_2[i] = x_last_0[i]*u_i_j[0][2] +x_last_1[i]*u_i_j[1][2] +x_last_2[i]*u_i_j[2][2] +x_last_3[i]*u_i_j[3][2] +
                      x_last_4[i]*u_i_j[4][2] +x_last_5[i]*u_i_j[5][2] +x_last_6[i]*u_i_j[6][2];
@@ -158,7 +168,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
         x_mix_6[i] = x_last_0[i]*u_i_j[0][6] +x_last_1[i]*u_i_j[1][6] +x_last_2[i]*u_i_j[2][6] +x_last_3[i]*u_i_j[3][6] +
                      x_last_4[i]*u_i_j[4][6] +x_last_5[i]*u_i_j[5][6] +x_last_6[i]*u_i_j[6][6];
     }
-
+    //hal.console->printf("\n");
 
     for(i=0;i<8;i++){
         for(j=0;j<8;j++){
@@ -169,6 +179,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
                            +(P_last_4[i][j]+(x_last_4[i]-x_mix_0[i])*(x_last_4[j]-x_mix_0[j]))*u_i_j[4][0]
                            +(P_last_5[i][j]+(x_last_5[i]-x_mix_0[i])*(x_last_5[j]-x_mix_0[j]))*u_i_j[5][0]
                            +(P_last_6[i][j]+(x_last_6[i]-x_mix_0[i])*(x_last_6[j]-x_mix_0[j]))*u_i_j[6][0];
+            //hal.console->printf("%.4f,  ",P_mix_0[i][j]);
 
             P_mix_1[i][j] = (P_last_0[i][j]+(x_last_0[i]-x_mix_1[i])*(x_last_0[j]-x_mix_1[j]))*u_i_j[0][1]
                            +(P_last_1[i][j]+(x_last_1[i]-x_mix_1[i])*(x_last_1[j]-x_mix_1[j]))*u_i_j[1][1]
@@ -177,6 +188,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
                            +(P_last_4[i][j]+(x_last_4[i]-x_mix_1[i])*(x_last_4[j]-x_mix_1[j]))*u_i_j[4][1]
                            +(P_last_5[i][j]+(x_last_5[i]-x_mix_1[i])*(x_last_5[j]-x_mix_1[j]))*u_i_j[5][1]
                            +(P_last_6[i][j]+(x_last_6[i]-x_mix_1[i])*(x_last_6[j]-x_mix_1[j]))*u_i_j[6][1];
+            //hal.console->printf("%.4f,  ",P_mix_0[i][j]);
 
             P_mix_2[i][j] = (P_last_0[i][j]+(x_last_0[i]-x_mix_2[i])*(x_last_0[j]-x_mix_2[j]))*u_i_j[0][2]
                            +(P_last_1[i][j]+(x_last_1[i]-x_mix_2[i])*(x_last_1[j]-x_mix_2[j]))*u_i_j[1][2]
@@ -218,13 +230,14 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
                            +(P_last_5[i][j]+(x_last_5[i]-x_mix_6[i])*(x_last_5[j]-x_mix_6[j]))*u_i_j[5][6]
                            +(P_last_6[i][j]+(x_last_6[i]-x_mix_6[i])*(x_last_6[j]-x_mix_6[j]))*u_i_j[6][6];
         }
+        //hal.console->printf("\n");
     }
 
     //
     //并行滤波开始----------------------------------------------------------------------------------------------------------
     //
 
-   for(i=0;i<8;i++){
+    for(i=0;i<8;i++){
        x_pre_0[i] = A_State[i][0]*x_mix_0[0]+A_State[i][1]*x_mix_0[1]+A_State[i][2]*x_mix_0[2]+A_State[i][3]*x_mix_0[3]
                    +A_State[i][4]*x_mix_0[4]+A_State[i][5]*x_mix_0[5]+A_State[i][6]*x_mix_0[6]+A_State[i][7]*x_mix_0[7]
 
@@ -232,7 +245,9 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
                    +B_State[i][3]*U_in[3]+B_State[i][4]*U_in[4]+B_State[i][5]*U_in[5]
                    
                    -B_g[i];
+        //hal.console->printf("%.4f,  ",x_pre_0[i]);
    }
+   //hal.console->printf("\n");
 
    for(i=0;i<8;i++){
        x_pre_1[i] = A_State[i][0]*x_mix_1[0]+A_State[i][1]*x_mix_1[1]+A_State[i][2]*x_mix_1[2]+A_State[i][3]*x_mix_1[3]
@@ -242,7 +257,9 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
                    +B_State_1[i][3]*U_in[3]+B_State_1[i][4]*U_in[4]+B_State_1[i][5]*U_in[5]
                    
                    -B_g[i];
+        //hal.console->printf("%.4f,  ",x_pre_1[i]);
    }
+   //hal.console->printf("\n");
 
    for(i=0;i<8;i++){
        x_pre_2[i] = A_State[i][0]*x_mix_2[0]+A_State[i][1]*x_mix_2[1]+A_State[i][2]*x_mix_2[2]+A_State[i][3]*x_mix_2[3]
@@ -295,15 +312,18 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
    }
 
     //-------------------------------------------------------计算残差---------------------------------------------------------------------
-    for(i=0;i<3;i++){
+    for(i=0;i<4;i++){//修改后
         z_res_0[i] = z_real[i]-(C_State[i][0]*x_pre_0[0]+C_State[i][1]*x_pre_0[1]+C_State[i][2]*x_pre_0[2]+C_State[i][3]*x_pre_0[3]
                                +C_State[i][4]*x_pre_0[4]+C_State[i][5]*x_pre_0[5]+C_State[i][6]*x_pre_0[6]+C_State[i][7]*x_pre_0[7]);
+        //hal.console->printf("%.4f,  ",z_res_0[i]);
 
         z_res_1[i] = z_real[i]-(C_State[i][0]*x_pre_1[0]+C_State[i][1]*x_pre_1[1]+C_State[i][2]*x_pre_1[2]+C_State[i][3]*x_pre_1[3]
                                +C_State[i][4]*x_pre_1[4]+C_State[i][5]*x_pre_1[5]+C_State[i][6]*x_pre_1[6]+C_State[i][7]*x_pre_1[7]);
+        //hal.console->printf("%.4f,  ",z_res_1[i]);
 
         z_res_2[i] = z_real[i]-(C_State[i][0]*x_pre_2[0]+C_State[i][1]*x_pre_2[1]+C_State[i][2]*x_pre_2[2]+C_State[i][3]*x_pre_2[3]
                                +C_State[i][4]*x_pre_2[4]+C_State[i][5]*x_pre_2[5]+C_State[i][6]*x_pre_2[6]+C_State[i][7]*x_pre_2[7]);
+        //hal.console->printf("%.4f,  ",z_res_2[i]);
 
         z_res_3[i] = z_real[i]-(C_State[i][0]*x_pre_3[0]+C_State[i][1]*x_pre_3[1]+C_State[i][2]*x_pre_3[2]+C_State[i][3]*x_pre_3[3]
                                +C_State[i][4]*x_pre_3[4]+C_State[i][5]*x_pre_3[5]+C_State[i][6]*x_pre_3[6]+C_State[i][7]*x_pre_3[7]);
@@ -317,6 +337,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
         z_res_6[i] = z_real[i]-(C_State[i][0]*x_pre_6[0]+C_State[i][1]*x_pre_6[1]+C_State[i][2]*x_pre_6[2]+C_State[i][3]*x_pre_6[3]
                                +C_State[i][4]*x_pre_6[4]+C_State[i][5]*x_pre_6[5]+C_State[i][6]*x_pre_6[6]+C_State[i][7]*x_pre_6[7]);
     }
+    //hal.console->printf("\n");
 
     //------------------------------------------------计算过程方差------------------------------------------------------------------------
     //先计算A*P_mix
@@ -379,13 +400,16 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     for(i=0;i<8;i++){
         for(j=0;j<8;j++){
             P_pre_0[i][j] = A_P_A_0[i][j];
+            //hal.console->printf("%.4f,  ",P_pre_0[i][j]);
             P_pre_1[i][j] = A_P_A_1[i][j];
+            //hal.console->printf("%.4f,  ",P_pre_1[i][j]);
             P_pre_2[i][j] = A_P_A_2[i][j];
             P_pre_3[i][j] = A_P_A_3[i][j];
             P_pre_4[i][j] = A_P_A_4[i][j];
             P_pre_5[i][j] = A_P_A_5[i][j];
             P_pre_6[i][j] = A_P_A_6[i][j];
         }
+        //hal.console->printf("\n");
     }
     
     //----------------------------------------------------计算观测方差--------------------------------------------------------------------
@@ -415,12 +439,16 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     }
     //再计算C*P*C'
     for(i=0;i<4;i++){
-        for(j=4;j<4;j++){
+        for(j=0;j<4;j++){//错误后更正
             S_0[i][j] = C_P_0[i][0]*C_State[j][0]+C_P_0[i][1]*C_State[j][1]+C_P_0[i][2]*C_State[j][2]+C_P_0[i][3]*C_State[j][3]
                        +C_P_0[i][4]*C_State[j][4]+C_P_0[i][5]*C_State[j][5]+C_P_0[i][6]*C_State[j][6]+C_P_0[i][7]*C_State[j][7];
 
+            //hal.console->printf("%.4f,  ",S_0[i][j]);
+
             S_1[i][j] = C_P_1[i][0]*C_State[j][0]+C_P_1[i][1]*C_State[j][1]+C_P_1[i][2]*C_State[j][2]+C_P_1[i][3]*C_State[j][3]
                        +C_P_1[i][4]*C_State[j][4]+C_P_1[i][5]*C_State[j][5]+C_P_1[i][6]*C_State[j][6]+C_P_1[i][7]*C_State[j][7];
+
+            //hal.console->printf("%.4f,  ",S_1[i][j]);
 
             S_2[i][j] = C_P_2[i][0]*C_State[j][0]+C_P_2[i][1]*C_State[j][1]+C_P_2[i][2]*C_State[j][2]+C_P_2[i][3]*C_State[j][3]
                        +C_P_2[i][4]*C_State[j][4]+C_P_2[i][5]*C_State[j][5]+C_P_2[i][6]*C_State[j][6]+C_P_2[i][7]*C_State[j][7];
@@ -437,6 +465,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             S_6[i][j] = C_P_6[i][0]*C_State[j][0]+C_P_6[i][1]*C_State[j][1]+C_P_6[i][2]*C_State[j][2]+C_P_6[i][3]*C_State[j][3]
                        +C_P_6[i][4]*C_State[j][4]+C_P_6[i][5]*C_State[j][5]+C_P_6[i][6]*C_State[j][6]+C_P_6[i][7]*C_State[j][7];
         }
+        //hal.console->printf("\n");
     }
     
     inverse4x4(*S_0,*S_inv_0);
@@ -479,8 +508,10 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     for(i=0;i<8;i++){
         for(j=0;j<4;j++){
             k_gain_0[i][j] = P_C_0[i][0]*S_inv_0[0][j]+P_C_0[i][1]*S_inv_0[1][j]+P_C_0[i][2]*S_inv_0[2][j]+P_C_0[i][3]*S_inv_0[3][j];
+            //hal.console->printf("%.4f,  ",k_gain_0[i][j]);
 
             k_gain_1[i][j] = P_C_1[i][0]*S_inv_1[0][j]+P_C_1[i][1]*S_inv_1[1][j]+P_C_1[i][2]*S_inv_1[2][j]+P_C_1[i][3]*S_inv_1[3][j];
+            //hal.console->printf("%.4f,  ",k_gain_1[i][j]);
 
             k_gain_2[i][j] = P_C_2[i][0]*S_inv_2[0][j]+P_C_2[i][1]*S_inv_2[1][j]+P_C_2[i][2]*S_inv_2[2][j]+P_C_2[i][3]*S_inv_2[3][j];
 
@@ -492,15 +523,20 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
 
             k_gain_6[i][j] = P_C_6[i][0]*S_inv_6[0][j]+P_C_6[i][1]*S_inv_6[1][j]+P_C_6[i][2]*S_inv_6[2][j]+P_C_6[i][3]*S_inv_6[3][j];
         }
+        //hal.console->printf("\n");
     }
+    //hal.console->printf("\n");
 
     //------------------------------------计算滤波器的输出状态和方差--------------------------------------------------------------------
     for(i=0;i<8;i++){
         x_next_0[i] = x_pre_0[i]+k_gain_0[i][0]*z_res_0[0]+k_gain_0[i][1]*z_res_0[1]
                                 +k_gain_0[i][2]*z_res_0[2]+k_gain_0[i][3]*z_res_0[3];
+        //hal.console->printf("%.4f,  ",x_next_0[i]);
+
 
         x_next_1[i] = x_pre_1[i]+k_gain_1[i][0]*z_res_1[0]+k_gain_1[i][1]*z_res_1[1]
                                 +k_gain_1[i][2]*z_res_1[2]+k_gain_1[i][3]*z_res_1[3];
+        //hal.console->printf("%.4f,  ",x_next_1[i]);
 
         x_next_2[i] = x_pre_2[i]+k_gain_2[i][0]*z_res_2[0]+k_gain_2[i][1]*z_res_2[1]
                                 +k_gain_2[i][2]*z_res_2[2]+k_gain_2[i][3]*z_res_2[3];
@@ -517,6 +553,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
         x_next_6[i] = x_pre_6[i]+k_gain_6[i][0]*z_res_6[0]+k_gain_6[i][1]*z_res_6[1]
                                 +k_gain_6[i][2]*z_res_6[2]+k_gain_6[i][3]*z_res_6[3];
     }
+    //hal.console->printf("\n");
 
     //--------------------------------------计算P_next--------------------------------------------------------------------------------
     //先计算E-KC
@@ -551,8 +588,12 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             P_next_0[i][j] = E_KC_0[i][0]*P_pre_0[0][j]+E_KC_0[i][1]*P_pre_0[1][j]+E_KC_0[i][2]*P_pre_0[2][j]+E_KC_0[i][3]*P_pre_0[3][j]
                             +E_KC_0[i][4]*P_pre_0[4][j]+E_KC_0[i][5]*P_pre_0[5][j]+E_KC_0[i][6]*P_pre_0[6][j]+E_KC_0[i][7]*P_pre_0[7][j];
 
+            //hal.console->printf("%.4f,  ",P_next_0[i][j]);
+
             P_next_1[i][j] = E_KC_1[i][0]*P_pre_1[0][j]+E_KC_1[i][1]*P_pre_1[1][j]+E_KC_1[i][2]*P_pre_1[2][j]+E_KC_1[i][3]*P_pre_1[3][j]
                             +E_KC_1[i][4]*P_pre_1[4][j]+E_KC_1[i][5]*P_pre_1[5][j]+E_KC_1[i][6]*P_pre_1[6][j]+E_KC_1[i][7]*P_pre_1[7][j];
+
+            //hal.console->printf("%.4f,  ",P_next_0[i][j]);
 
             P_next_2[i][j] = E_KC_2[i][0]*P_pre_2[0][j]+E_KC_2[i][1]*P_pre_2[1][j]+E_KC_2[i][2]*P_pre_2[2][j]+E_KC_2[i][3]*P_pre_2[3][j]
                             +E_KC_2[i][4]*P_pre_2[4][j]+E_KC_2[i][5]*P_pre_2[5][j]+E_KC_2[i][6]*P_pre_2[6][j]+E_KC_2[i][7]*P_pre_2[7][j];
@@ -569,7 +610,9 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             P_next_6[i][j] = E_KC_6[i][0]*P_pre_6[0][j]+E_KC_6[i][1]*P_pre_6[1][j]+E_KC_6[i][2]*P_pre_6[2][j]+E_KC_6[i][3]*P_pre_6[3][j]
                             +E_KC_6[i][4]*P_pre_6[4][j]+E_KC_6[i][5]*P_pre_6[5][j]+E_KC_6[i][6]*P_pre_6[6][j]+E_KC_6[i][7]*P_pre_6[7][j];
         }
+        //hal.console->printf("\n");
     }
+    //hal.console->printf("\n");
     //-------------------------------------------------模型可能性计算----------------------------------------------------------------
     //先计算Z_res'*S_inv*Z_res
     //先计算Z_res'*S_inv
@@ -577,7 +620,11 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     for(i=0;i<4;i++){
         ZT_SI_0[i] = z_res_0[0]*S_inv_0[0][i]+z_res_0[1]*S_inv_0[1][i]+z_res_0[2]*S_inv_0[2][i]+z_res_0[3]*S_inv_0[3][i];
 
+        //hal.console->printf("%.4f,  ",ZT_SI_0[i]);
+
         ZT_SI_1[i] = z_res_1[0]*S_inv_1[0][i]+z_res_1[1]*S_inv_1[1][i]+z_res_1[2]*S_inv_1[2][i]+z_res_1[3]*S_inv_1[3][i];
+
+        //hal.console->printf("%.4f,  ",ZT_SI_1[i]);
 
         ZT_SI_2[i] = z_res_2[0]*S_inv_2[0][i]+z_res_2[1]*S_inv_2[1][i]+z_res_2[2]*S_inv_2[2][i]+z_res_2[3]*S_inv_2[3][i];
 
@@ -589,12 +636,18 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
 
         ZT_SI_6[i] = z_res_6[0]*S_inv_6[0][i]+z_res_6[1]*S_inv_6[1][i]+z_res_6[2]*S_inv_6[2][i]+z_res_6[3]*S_inv_6[3][i];
     }
+    //hal.console->printf("\n");
 
     //再计算ZT_SI*Z_res
 
     ZSZ_0 = ZT_SI_0[0]*z_res_0[0]+ZT_SI_0[1]*z_res_0[1]+ZT_SI_0[2]*z_res_0[2]+ZT_SI_0[3]*z_res_0[3];
 
+    //hal.console->printf("%.4f,  ",ZSZ_0);
+    //hal.console->printf("\n");
+
     ZSZ_1 = ZT_SI_1[0]*z_res_1[0]+ZT_SI_1[1]*z_res_1[1]+ZT_SI_1[2]*z_res_1[2]+ZT_SI_1[3]*z_res_1[3];
+    //hal.console->printf("%.4f,  ",ZSZ_1);
+    //hal.console->printf("\n");
 
     ZSZ_2 = ZT_SI_2[0]*z_res_2[0]+ZT_SI_2[1]*z_res_2[1]+ZT_SI_2[2]*z_res_2[2]+ZT_SI_2[3]*z_res_2[3];
 
@@ -614,6 +667,8 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     float exp_4 = expf(-0.5*ZSZ_4);
     float exp_5 = expf(-0.5*ZSZ_5);
     float exp_6 = expf(-0.5*ZSZ_6);
+
+    //hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",exp_0,exp_1,exp_2,exp_3,exp_4,exp_5,exp_6);
     
     //计算S的行列式
     S_0_det = get_mat_det(S_0);
@@ -624,6 +679,8 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     S_5_det = get_mat_det(S_5);
     S_6_det = get_mat_det(S_6);
 
+    //hal.console->printf("%.4f, %.4f, %.4f, %.4f, %.4f, %.4f, %.4f\n",S_0_det,S_1_det,S_2_det,S_3_det,S_4_det,S_5_det,S_6_det);
+
     //计算模型可能性
     Mu_pre[0] = exp_0/(sqrtl(2*3.14*S_0_det));
     Mu_pre[1] = exp_1/(sqrtl(2*3.14*S_1_det));
@@ -633,18 +690,25 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     Mu_pre[5] = exp_5/(sqrtl(2*3.14*S_5_det));
     Mu_pre[6] = exp_6/(sqrtl(2*3.14*S_6_det));
     
+    hal.console->printf("%.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f\n",Mu_pre[0],Mu_pre[1],Mu_pre[2],Mu_pre[3],Mu_pre[4],Mu_pre[5],Mu_pre[6]);
+    hal.console->printf("\n");
     //-------------------------------------------------概率更新----------------------------------------------------------------------
     for(j=0;j<7;j++){
         C_IMM_b[j] = p_i_j[0][j]*Mu_last[0]+p_i_j[1][j]*Mu_last[1]+p_i_j[2][j]*Mu_last[2]+p_i_j[3][j]*Mu_last[3]
                     +p_i_j[4][j]*Mu_last[4]+p_i_j[5][j]*Mu_last[5]+p_i_j[6][j]*Mu_last[6];
+        //hal.console->printf("%.4f,  ",C_IMM_b[j]);
     }
+    //hal.console->printf("\n");
 
     C_IMM = Mu_pre[0]*C_IMM_b[0]+Mu_pre[1]*C_IMM_b[1]+Mu_pre[2]*C_IMM_b[2]+Mu_pre[3]*C_IMM_b[3]+Mu_pre[4]*C_IMM_b[4]
            +Mu_pre[5]*C_IMM_b[5]+Mu_pre[6]*C_IMM_b[6];
+    //hal.console->printf("%.4f,  ",C_IMM);
+    //hal.console->printf("\n");
 
     for(i=0;i<7;i++){
         Mu_next[i] = Mu_pre[i]*C_IMM_b[i]/C_IMM;
     }
+    //hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
 
     //寻找可能性最大的模型概率
     if(Mu_next[0]>=0.5){
@@ -674,17 +738,24 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
 
     for(i=0;i<7;i++){
         Mu_last[i] = Mu_next[i];
+        //hal.console->printf("%.4f,  ",Mu_last[i]);
     }
+    //hal.console->printf("\n");
 
     for(i=0;i<8;i++){
         x_last_0[i] = x_next_0[i];
+
+        //hal.console->printf("%.4f,  ",x_last_0[i]);
         x_last_1[i] = x_next_1[i];
+
+        //hal.console->printf("%.4f,  ",x_last_1[i]);
         x_last_2[i] = x_next_2[i];
         x_last_3[i] = x_next_3[i];
         x_last_4[i] = x_next_4[i];
         x_last_5[i] = x_next_5[i];
         x_last_6[i] = x_next_6[i];
     }
+    //hal.console->printf("\n");
 
     for(i=0;i<8;i++){
         for(j=0;j<8;j++){
