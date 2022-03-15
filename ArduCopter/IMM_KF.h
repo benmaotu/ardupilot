@@ -2,7 +2,11 @@
 #include "math.h"
 #include <GCS_MAVLink/GCS.h>
 
-float T = 0.303;                //定义函数运行周期，将函数放入100Hz循环//3.3Hz
+//define plus
+#define X
+
+float T = 0.303;
+//float T = 0.1;                 //定义函数运行周期，将函数放入100Hz循环//3.3Hz
 //float kt = 9.122e-6;            //定义无人机升力系数
 //float kq = 1.133e-7;            //定义无人机反扭力系数
 float kt = 1.308e-6;
@@ -14,6 +18,8 @@ float d_hexa = 0.275;               //定义无人机机臂长度
 float Ixx = 3.627e-2;            //定义x轴转动惯量
 float Iyy = 3.627e-2;            //定义y轴转动惯量
 float Izz = 6.780e-2;            //定义z轴转动惯量
+
+int8_t t_run = 0;//定义非初始化值的运行次数
 
 //定义模型概率转移矩阵
 float p_i_j[7][7] = {
@@ -46,7 +52,89 @@ float A_State[8][8] = {
 float a_roll    =   kt*d_hexa/Ixx;
 float a_pitch   =   kt*d_hexa/Iyy;
 float a_yaw     =   kq/Izz;
-float B_State[8][6] = {
+
+#ifdef X
+
+    float B_State[8][6] = {
+    {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
+    {kt*T/m_hexa,            kt*T/m_hexa,             kt*T/m_hexa,              kt*T/m_hexa,               kt*T/m_hexa,              kt*T/m_hexa},
+    {-a_roll*T*T/2.0f,       a_roll*T*T/2.0f,         a_roll*T*T*0.5/2.0f,      -a_roll*T*T*0.5f/2.0f,     -a_roll*T*T*0.5f/2.0f,    a_roll*T*T*0.5f/2.0f},
+    {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
+    {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
+    {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+};
+
+float B_State_1[8][6] = {
+    {0,   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
+    {0,   kt*T/m_hexa,             kt*T/m_hexa,              kt*T/m_hexa,               kt*T/m_hexa,              kt*T/m_hexa},
+    {0,   a_roll*T*T/2.0f,         a_roll*T*T*0.5/2.0f,      -a_roll*T*T*0.5f/2.0f,     -a_roll*T*T*0.5f/2.0f,    a_roll*T*T*0.5f/2.0f},
+    {0,   a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
+    {0,   0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
+    {0,   0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
+    {0,   a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
+    {0,   a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+};
+
+float B_State_2[8][6] = {
+    {kt*T*T/(2.0f*m_hexa),   0,    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
+    {kt*T/m_hexa,            0,    kt*T/m_hexa,              kt*T/m_hexa,               kt*T/m_hexa,              kt*T/m_hexa},
+    {-a_roll*T*T/2.0f,       0,    a_roll*T*T*0.5/2.0f,      -a_roll*T*T*0.5f/2.0f,     -a_roll*T*T*0.5f/2.0f,    a_roll*T*T*0.5f/2.0f},
+    {-a_roll*T,              0,    a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
+    {0,                      0,    a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
+    {0,                      0,    a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
+    {-a_yaw*T*T/2.0f,        0,    -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
+    {-a_yaw*T,               0,    -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+};
+
+float B_State_3[8][6] = {
+   {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),     0,     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
+    {kt*T/m_hexa,            kt*T/m_hexa,             0,     kt*T/m_hexa,               kt*T/m_hexa,              kt*T/m_hexa},
+    {-a_roll*T*T/2.0f,       a_roll*T*T/2.0f,         0,     -a_roll*T*T*0.5f/2.0f,     -a_roll*T*T*0.5f/2.0f,    a_roll*T*T*0.5f/2.0f},
+    {-a_roll*T,              a_roll*T,                0,     -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
+    {0,                      0,                       0,     -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
+    {0,                      0,                       0,     -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          0,     a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 0,     a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+};
+
+float B_State_4[8][6] = {
+    {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     0,      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
+    {kt*T/m_hexa,            kt*T/m_hexa,             kt*T/m_hexa,              0,      kt*T/m_hexa,              kt*T/m_hexa},
+    {-a_roll*T*T/2.0f,       a_roll*T*T/2.0f,         a_roll*T*T*0.5/2.0f,      0,      -a_roll*T*T*0.5f/2.0f,    a_roll*T*T*0.5f/2.0f},
+    {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             0,      -a_roll*T*0.5f,           a_roll*T*0.5f},
+    {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  0,      a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
+    {0,                      0,                       a_pitch*T*0.866f,         0,      a_pitch*T*0.866f,         -a_pitch*T*0.866f},
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          0,      a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 0,      a_yaw*T,                  -a_yaw*T}
+};
+
+float B_State_5[8][6] = {
+   {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),       0,     kt*T*T/(2.0f*m_hexa)},
+    {kt*T/m_hexa,            kt*T/m_hexa,             kt*T/m_hexa,              kt*T/m_hexa,               0,     kt*T/m_hexa},
+    {-a_roll*T*T/2.0f,       a_roll*T*T/2.0f,         a_roll*T*T*0.5/2.0f,      -a_roll*T*T*0.5f/2.0f,     0,     a_roll*T*T*0.5f/2.0f},
+    {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            0,     a_roll*T*0.5f},
+    {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  0,     -a_pitch*T*T*0.866f/2.f},
+    {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         0,     -a_pitch*T*0.866f},
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            0,     -a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   0,     -a_yaw*T}
+};
+
+float B_State_6[8][6] = {
+    {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     0},
+    {kt*T/m_hexa,            kt*T/m_hexa,             kt*T/m_hexa,              kt*T/m_hexa,               kt*T/m_hexa,              0},
+    {-a_roll*T*T/2.0f,       a_roll*T*T/2.0f,         a_roll*T*T*0.5/2.0f,      -a_roll*T*T*0.5f/2.0f,     -a_roll*T*T*0.5f/2.0f,    0},
+    {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           0},
+    {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  0},
+    {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         0},
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           0},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  0}
+};
+
+#else
+
+    float B_State[8][6] = {
     {kt*T*T/(2.0f*m_hexa),   kt*T*T/(2.0f*m_hexa),    kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa),      kt*T*T/(2.0f*m_hexa),     kt*T*T/(2.0f*m_hexa)},
     {kt*T/m_hexa,            kt*T/m_hexa,             kt*T/m_hexa,              kt*T/m_hexa,               kt*T/m_hexa,              kt*T/m_hexa},
     {0.0f,                   0.0f,                    a_roll*T*T*0.866f/2.0f,   -a_roll*T*T*0.866f/2.0f,   a_roll*T*T*0.866f/2.0f,   -a_roll*T*T*0.866f/2.0f},
@@ -122,6 +210,10 @@ float B_State_6[8][6] = {
     {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           0},
     {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  0}
 };
+
+#endif
+
+
 
 //定义输出矩阵
 float C_State[4][8] = {

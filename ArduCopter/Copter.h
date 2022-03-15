@@ -845,6 +845,11 @@ private:
     void motors_output();
     void lost_vehicle_check();
 
+/*----------------------------------------------------------------------------------------------------------------------*/
+    friend class AP_MotorsMatrix;
+/*----------------------------------------------------------------------------------------------------------------------*/
+
+
     // navigation.cpp
     void run_nav_updates(void);
     int32_t home_bearing();
@@ -999,6 +1004,15 @@ private:
 #else
     ModeStabilize mode_stabilize;
 #endif
+
+/*-------------------------------------添加自定义模式-------------------------------------------------*/
+
+
+    ModeFaultTolerant mode_faulttolerant;
+
+
+/*---------------------------------------------------------------------------------------------------*/
+
 #if MODE_SPORT_ENABLED == ENABLED
     ModeSport mode_sport;
 #endif

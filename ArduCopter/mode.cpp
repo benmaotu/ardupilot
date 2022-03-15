@@ -154,6 +154,13 @@ Copter::Mode *Copter::mode_from_mode_num(const uint8_t mode)
             ret = &mode_follow;
             break;
 #endif
+/*------------------------------------添加自定义模式------------------------------------------------------*/
+
+        case FAULTTOLERANT:
+            ret = &mode_faulttolerant;
+            break;
+
+/*-------------------------------------------------------------------------------------------------------*/
 
         default:
             break;

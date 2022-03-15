@@ -23,6 +23,10 @@
 
 extern const AP_HAL::HAL& hal;
 
+#include <GCS_MAVLink/GCS.h>
+
+extern int8_t fault_injection_a;
+
 // init
 void AP_MotorsMatrix::init(motor_frame_class frame_class, motor_frame_type frame_type)
 {
@@ -121,6 +125,13 @@ void AP_MotorsMatrix::output_to_motors()
             rc_write(i, motor_out[i]);
         }
     }
+
+    /*---------------------------------20220228----------------------------------------------------------------*/
+    if(fault_injection_a == 0){
+        //motor_out[4] = 0;//故障注入，停转5号电机
+        rc_write(0, 0);
+    }
+    /*---------------------------------------------------------------------------------------------------------*/
 }
 
 //-----------------------------为故障诊断添加函数，以获取最终输入到电机的pwm值------------------------------------------------------------

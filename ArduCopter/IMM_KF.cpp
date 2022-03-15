@@ -127,6 +127,31 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             Mu_last[i] = 0.143;
         }
     }
+
+    //if(t_run>1){
+        t_run = 0;
+        for(i=0;i<8;i++){//debug 每次循环开始，都将真实状态值赋值给各个模型
+            x_last_0[i] = x_real[i];x_last_1[i] = x_real[i];x_last_2[i] = x_real[i];x_last_3[i] = x_real[i];
+            x_last_4[i] = x_real[i];x_last_5[i] = x_real[i];x_last_6[i] = x_real[i];
+        }
+
+    for(i=0;i<8;i++){
+            for(j=0;j<8;j++){
+                if(i==j){
+                    P_last_0[i][j] = 1.0f; P_last_1[i][j] = 1.0f; P_last_2[i][j] = 1.0f; P_last_3[i][j] = 1.0f;
+                    P_last_4[i][j] = 1.0f; P_last_5[i][j] = 1.0f; P_last_6[i][j] = 1.0f;
+                }else{
+                    P_last_0[i][j] = 0.0f; P_last_1[i][j] = 0.0f; P_last_2[i][j] = 0.0f; P_last_3[i][j] = 0.0f;
+                    P_last_4[i][j] = 0.0f; P_last_5[i][j] = 0.0f; P_last_6[i][j] = 0.0f;
+                }
+            }
+        }
+
+       /*  for(i=0;i<7;i++){
+            Mu_last[i] = 0.143;
+        } */
+    //}
+    
     
     //
     //计算uij----------------------------------------------------------------------------------------------------------------
@@ -690,8 +715,8 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     Mu_pre[5] = exp_5/(sqrtl(2*3.14*S_5_det));
     Mu_pre[6] = exp_6/(sqrtl(2*3.14*S_6_det));
     
-    hal.console->printf("%.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f\n",Mu_pre[0],Mu_pre[1],Mu_pre[2],Mu_pre[3],Mu_pre[4],Mu_pre[5],Mu_pre[6]);
-    hal.console->printf("\n");
+    //hal.console->printf("%.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f,  %.4f\n",Mu_pre[0],Mu_pre[1],Mu_pre[2],Mu_pre[3],Mu_pre[4],Mu_pre[5],Mu_pre[6]);
+    //hal.console->printf("\n");
     //-------------------------------------------------概率更新----------------------------------------------------------------------
     for(j=0;j<7;j++){
         C_IMM_b[j] = p_i_j[0][j]*Mu_last[0]+p_i_j[1][j]*Mu_last[1]+p_i_j[2][j]*Mu_last[2]+p_i_j[3][j]*Mu_last[3]
@@ -708,31 +733,33 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     for(i=0;i<7;i++){
         Mu_next[i] = Mu_pre[i]*C_IMM_b[i]/C_IMM;
     }
-    //hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
+    hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
 
     //寻找可能性最大的模型概率
-    if(Mu_next[0]>=0.5){
+    if(Mu_next[0]>=0.3){
         model_number = 0;
-    }else if(Mu_next[1]>=0.5){
+    }else if(Mu_next[1]>=0.3){
         model_number = 1;
-    }else if (Mu_next[2]>=0.5)
+    }else if (Mu_next[2]>=0.3)
     {
         model_number = 2;
-    }else if (Mu_next[3]>=0.5)
+    }else if (Mu_next[3]>=0.3)
     {
         model_number = 3;
-    }else if (Mu_next[4]>=0.5)
+    }else if (Mu_next[4]>=0.3)
     {
         model_number = 4;
-    }else if (Mu_next[5]>=0.5)
+    }else if (Mu_next[5]>=0.3)
     {
         model_number = 5;
-    }else if (Mu_next[6]>=0.5)
+    }else if (Mu_next[6]>=0.3)
     {
         model_number = 6;
     }else{
         model_number = 0;
     }
+
+    //t_run++;
     
     //更新下一时刻运算的初始值
 
@@ -742,7 +769,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     }
     //hal.console->printf("\n");
 
-    for(i=0;i<8;i++){
+    /* for(i=0;i<8;i++){
         x_last_0[i] = x_next_0[i];
 
         //hal.console->printf("%.4f,  ",x_last_0[i]);
@@ -754,10 +781,10 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
         x_last_4[i] = x_next_4[i];
         x_last_5[i] = x_next_5[i];
         x_last_6[i] = x_next_6[i];
-    }
+    } */
     //hal.console->printf("\n");
 
-    for(i=0;i<8;i++){
+    /* for(i=0;i<8;i++){
         for(j=0;j<8;j++){
             P_last_0[i][j] = P_next_0[i][j];
             P_last_1[i][j] = P_next_1[i][j];
@@ -767,7 +794,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
             P_last_5[i][j] = P_next_5[i][j];
             P_last_6[i][j] = P_next_6[i][j];
         }
-    }
+    } */
 
     return model_number;
 }
