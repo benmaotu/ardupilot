@@ -314,14 +314,14 @@ void Copter::motors_output()
 #endif
 
 /*--------------------------------------------------------------------------------------------------------------------------------*/
-    if(flightmode == &mode_faulttolerant && fault_injection_a == 1){
-        fault_injection_a = 0;
-        
-
-    }
-    if(flightmode != &mode_faulttolerant){
-        fault_injection_a = 1;
-    }
+   // if(flightmode == &mode_faulttolerant && fault_injection_a == 1){
+   //     fault_injection_a = 0;
+   //     
+//
+//    }
+//    if(flightmode != &mode_faulttolerant){
+ //       fault_injection_a = 1;
+ //   }
 
 /*--------------------------------------------------------------------------------------------------------------------------------*/
 

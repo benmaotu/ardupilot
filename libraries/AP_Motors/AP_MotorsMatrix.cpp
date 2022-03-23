@@ -116,7 +116,7 @@ void AP_MotorsMatrix::output_to_motors()
     }
 
     for(i=0;i<6;i++){
-        U_IMM[i] = motor_out[i]*motor_out[i];
+        U_IMM[i] = motor_out[i]*motor_out[i];//获取pwm值的平方
     }
 
     // send output to each motor
@@ -130,6 +130,7 @@ void AP_MotorsMatrix::output_to_motors()
     if(fault_injection_a == 0){
         //motor_out[4] = 0;//故障注入，停转5号电机
         rc_write(0, 0);
+        //rc_write(1,0);
 
         //舵机输出
         //rc_write()

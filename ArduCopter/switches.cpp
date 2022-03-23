@@ -2,6 +2,10 @@
 
 #define CONTROL_SWITCH_DEBOUNCE_TIME_MS  200
 
+//------------------------------------------------------------------------------------------------------------------------------
+extern int8_t fault_injection_a;//实现故障注入所用参数
+//------------------------------------------------------------------------------------------------------------------------------
+
 //Documentation of Aux Switch Flags:
 struct {
     uint8_t CH6_flag;   // ch6 aux switch : 0 is low or false, 1 is center or true, 2 is high
@@ -788,6 +792,22 @@ void Copter::do_aux_switch_function(int8_t ch_function, uint8_t ch_flag)
             userhook_auxSwitch3(ch_flag);
             break;
 #endif
+
+    //------------------------------------------------------------------------------------------------------------------------
+
+        case AUXSW_FAULT_INJECTION:
+            switch (ch_flag){
+                case AUX_SWITCH_HIGH:{
+                    fault_injection_a = 0;//此参数为0时，停转一个电机
+                    break;
+                }
+                case AUX_SWITCH_LOW: {
+                    fault_injection_a = 1;
+                    break;
+                }
+            }
+
+    //------------------------------------------------------------------------------------------------------------------------
     }
 }
 
