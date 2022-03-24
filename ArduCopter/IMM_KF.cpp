@@ -46,12 +46,13 @@ void Copter::State_refresh(){
     //hal.console->printf("%d",number_IMM);
     //IMM_Kalman_Filter(x_1_IMM,U_1_IMM,Z_1_IMM);
 
-    if(x_IMM[0]>3.0f){
+    //if(x_IMM[0]>3.0f){
         number_IMM = IMM_Kalman_Filter(x_IMM,U_IMM,Z_IMM);
 
         hal.console->printf("%d\n",number_IMM);
+        gcs().send_text(MAV_SEVERITY_CRITICAL, "%d", number_IMM);
         
-    }
+    //}
 
 }
 
