@@ -79,6 +79,8 @@
 //#define USERHOOK_MEDIUMLOOP
 //#define USERHOOK_SLOWLOOP
 
+ extern int8_t number_IMM;
+
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
 /*
@@ -414,6 +416,8 @@ void Copter::three_hz_loop()
 
     // update ch6 in flight tuning
     tuning();
+
+    gcs().send_text(MAV_SEVERITY_CRITICAL, "%d", number_IMM);
 }
 
 // one_hz_loop - runs at 1Hz

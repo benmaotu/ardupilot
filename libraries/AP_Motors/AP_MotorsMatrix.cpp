@@ -129,12 +129,16 @@ void AP_MotorsMatrix::output_to_motors()
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(0, 0);
-        //rc_write(1,0);
+        rc_write(3, 0);
+        //rc_write(1, 0);
+        //rc_write(4,0);
 
         //舵机输出
-        //rc_write()
+        //rc_write(8,1500);
+        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1900);//控制舵机的输出
 
+    }else{
+        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1100);
     }
     /*---------------------------------------------------------------------------------------------------------*/
 }
