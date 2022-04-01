@@ -129,8 +129,8 @@ void AP_MotorsMatrix::output_to_motors()
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(3, 0);
-        //rc_write(1, 0);
+        rc_write(0, 0);
+        rc_write(1, 0);
         //rc_write(4,0);
 
         //舵机输出
@@ -535,7 +535,7 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                     add_motor(AP_MOTORS_MOT_6, 120, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  3);
                     success = true;
                     break;
-                case MOTOR_FRAME_TYPE_X:
+                /* case MOTOR_FRAME_TYPE_X:
                     add_motor(AP_MOTORS_MOT_1,  90, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
                     add_motor(AP_MOTORS_MOT_2, -90, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5);
                     add_motor(AP_MOTORS_MOT_3, -30, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  6);
@@ -543,7 +543,22 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                     add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
                     add_motor(AP_MOTORS_MOT_6,-150, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
                     success = true;
+                    break; */
+
+//--------------------------------------------------------------------------------------------------------------------------------
+//添加ppnnpn构型下的控制分配
+//以1号电机为起点，顺时针旋转分别为PPNNPN
+                case MOTOR_FRAME_TYPE_X:
+                    add_motor(AP_MOTORS_MOT_1,  90, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
+                    add_motor(AP_MOTORS_MOT_2, -90, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5);
+                    add_motor(AP_MOTORS_MOT_3, -30, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  6);
+                    add_motor(AP_MOTORS_MOT_4, 150, AP_MOTORS_MATRIX_YAW_FACTOR_CW, 3);
+                    add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
+                    add_motor(AP_MOTORS_MOT_6,-150, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  4);
+                    success = true;
                     break;
+
+//----------------------------------------------------------------------------------------------------------------------------------
                 case MOTOR_FRAME_TYPE_H:
                     // H is same as X except middle motors are closer to center
                     add_motor_raw(AP_MOTORS_MOT_1, -1.0f, 0.0f, AP_MOTORS_MATRIX_YAW_FACTOR_CW, 2);
