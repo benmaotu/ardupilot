@@ -130,7 +130,7 @@ void AP_MotorsMatrix::output_to_motors()
     if(fault_injection_a == 0){
         //motor_out[4] = 0;//故障注入，停转5号电机
         rc_write(0, 0);
-        rc_write(1, 0);
+        //rc_write(3, 0);
         //rc_write(4,0);
 
         //舵机输出
@@ -265,6 +265,56 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
     throttle_thrust_best_rpy = MIN(0.5f, throttle_avg_max);
 
+
+//-----------------------------------------------------------------------------------------------------------------------------------
+    if(fault_injection_a == 0){                 //故障注入后，更改控制分配
+        _roll_factor[0] = 0.0f;                 //1号旋翼失效时的控制分配
+        _roll_factor[1] = 0.4f;
+        _roll_factor[2] = 0.3f;
+        _roll_factor[3] = -0.3f;
+        _roll_factor[4] = -0.5f;
+        _roll_factor[5] = 0.1f;
+
+        _pitch_factor[0] = 0.0f;
+        _pitch_factor[1] = 0.0f;
+        _pitch_factor[2] = 0.5f;
+        _pitch_factor[3] = -0.5f;
+        _pitch_factor[4] = 0.5f;
+        _pitch_factor[5] = -0.5f;
+
+        _yaw_factor[0] = 0.0f;
+        _yaw_factor[1] = 0.1f * 1.667f;
+        _yaw_factor[2] = -0.3f * 1.667f;
+        _yaw_factor[3] = -0.2f * 1.667f;
+        _yaw_factor[4] = 0.25f * 1.667f;
+        _yaw_factor[5] = 0.15f * 1.667f;
+
+
+
+        /* _roll_factor[0] = -0.5f;                                  // -0.3529f * (5.0f/3.529f);                 //4号旋翼失效时的控制分配
+        _roll_factor[1] = 0.416f;                                 // 0.2941f * (5.0f/3.529f);
+        _roll_factor[2] = 0.5f;                                   // 0.3529f * (5.0f/3.529f);
+        _roll_factor[3] = 0.0f;                                     // 0.0f * (5.0f/3.529f);
+        _roll_factor[4] = -0.458f;                                // -0.3235f * (5.0f/3.529f);
+        _roll_factor[5] = 0.042f;                                 // 0.0294f * (5.0f/3.529f);
+
+        _pitch_factor[0] = -0.296f;                                      //-0.2717f * (5.0f/4.585f);
+        _pitch_factor[1] = 0.0373f;                                      //0.0340f * (5.0f/4.585f);
+        _pitch_factor[2] = 0.296f;                                      //0.2717f * (5.0f/4.585f);
+        _pitch_factor[3] = 0.0f;                                      //0.0f * (5.0f/4.585f);
+        _pitch_factor[4] = 0.4627f;                                      //0.4245f * (5.0f/4.585f);
+        _pitch_factor[5] = -0.5f;                                      //-0.4585f * (5.0f/4.585f);
+
+        _yaw_factor[0] = -0.292f;                                               // -0.2059f * (5.0f/3.529f);
+        _yaw_factor[1] = 0.125f;                                               // 0.0882f * (5.0f/3.529f);
+        _yaw_factor[2] = -0.416f;                                               // -0.2941f * (5.0f/3.529f);
+        _yaw_factor[3] = 0.0f;                                               // 0.0f * (5.0f/3.529f);
+        _yaw_factor[4] = 0.5f;                                               // 0.3529f * (5.0f/3.529f);
+        _yaw_factor[5] = 0.083f;                                               // 0.0588f * (5.0f/3.529f); */
+
+    }
+//-----------------------------------------------------------------------------------------------------------------------------------
+
     // calculate roll and pitch for each motor
     // calculate the amount of yaw input that each motor can accept
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
@@ -313,6 +363,7 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     }
 
     // check everything fits
+    //---------------------------------------------------------------------------------------------------------------------------------
     throttle_thrust_best_rpy = MIN(0.5f - (rpy_low+rpy_high)/2.0, throttle_avg_max);
     if (is_zero(rpy_low) && is_zero(rpy_high)){
         rpy_scale = 1.0f;
@@ -351,6 +402,24 @@ void AP_MotorsMatrix::output_armed_stabilizing()
             _thrust_rpyt_out[i] = throttle_thrust_best_rpy + thr_adj + rpy_scale*_thrust_rpyt_out[i];
         }
     }
+
+
+//---------------------------------------------------------------------------------------------------------------------------------
+    if(fault_injection_a == 0){
+        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1/0.3) + rpy_scale*_thrust_rpyt_out[1];//一号旋翼失效时的控制分配
+        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.2/0.3) + rpy_scale*_thrust_rpyt_out[2];
+        _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.3/0.3) + rpy_scale*_thrust_rpyt_out[3];
+        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.25/0.3) + rpy_scale*_thrust_rpyt_out[4];
+        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.15/0.3) + rpy_scale*_thrust_rpyt_out[5];
+
+       /*  _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.3235/0.3235) + rpy_scale*_thrust_rpyt_out[1];//4号旋翼失效时的控制分配
+        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1471/0.3235) + rpy_scale*_thrust_rpyt_out[2];
+        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.1765/0.3235) + rpy_scale*_thrust_rpyt_out[3];
+        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.0882/0.3235) + rpy_scale*_thrust_rpyt_out[4];
+        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.2647/0.3235) + rpy_scale*_thrust_rpyt_out[5]; */
+
+    }
+//---------------------------------------------------------------------------------------------------------------------------------
 
     // constrain all outputs to 0.0f to 1.0f
     // test code should be run with these lines commented out as they should not do anything
@@ -556,6 +625,29 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                     add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
                     add_motor(AP_MOTORS_MOT_6,-150, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  4);
                     success = true;
+
+                    _roll_factor[AP_MOTORS_MOT_1] = -0.2857;
+                    _roll_factor[AP_MOTORS_MOT_2] = 0.2857;
+                    _roll_factor[AP_MOTORS_MOT_3] = 0.3571;
+                    _roll_factor[AP_MOTORS_MOT_4] = -0.0714;
+                    _roll_factor[AP_MOTORS_MOT_5] = -0.3571;
+                    _roll_factor[AP_MOTORS_MOT_6] = 0.0714;
+
+                    _pitch_factor[AP_MOTORS_MOT_1] = 0;
+                    _pitch_factor[AP_MOTORS_MOT_2] = 0;
+                    _pitch_factor[AP_MOTORS_MOT_3] = 0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_4] = -0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_5] = 0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_6] = -0.2887;
+
+                    _yaw_factor[AP_MOTORS_MOT_1] = -0.0714;
+                    _yaw_factor[AP_MOTORS_MOT_2] = 0.0714;
+                    _yaw_factor[AP_MOTORS_MOT_3] = -0.2857;
+                    _yaw_factor[AP_MOTORS_MOT_4] = -0.1429;
+                    _yaw_factor[AP_MOTORS_MOT_5] = 0.2857;
+                    _yaw_factor[AP_MOTORS_MOT_6] = 0.1429;
+
+
                     break;
 
 //----------------------------------------------------------------------------------------------------------------------------------
