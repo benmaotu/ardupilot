@@ -2,8 +2,8 @@
 #include "math.h"
 #include <GCS_MAVLink/GCS.h>
 
-#define plus
-//#define X
+//#define plus
+#define X
 
 float T = 0.303;
 //float T = 0.1;                 //定义函数运行周期，将函数放入100Hz循环//3.3Hz
@@ -62,8 +62,8 @@ float a_yaw     =   kq/Izz;
     {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
     {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
     {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 -a_yaw*T,                   a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_1[8][6] = {
@@ -73,8 +73,8 @@ float B_State_1[8][6] = {
     {0,   a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
     {0,   0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
     {0,   0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
-    {0,   a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {0,   a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+    {0,   a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,         -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {0,   a_yaw*T,                 -a_yaw*T,                -a_yaw*T,                   a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_2[8][6] = {
@@ -84,8 +84,8 @@ float B_State_2[8][6] = {
     {-a_roll*T,              0,    a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
     {0,                      0,    a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
     {0,                      0,    a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
-    {-a_yaw*T*T/2.0f,        0,    -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               0,    -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        0,    -a_yaw*T*T/2.0f,         -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {-a_yaw*T,               0,    -a_yaw*T,                -a_yaw*T,                   a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_3[8][6] = {
@@ -95,8 +95,8 @@ float B_State_3[8][6] = {
     {-a_roll*T,              a_roll*T,                0,     -a_roll*T*0.5f,            -a_roll*T*0.5f,           a_roll*T*0.5f},
     {0,                      0,                       0,     -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
     {0,                      0,                       0,     -a_pitch*T*0.866f,         a_pitch*T*0.866f,         -a_pitch*T*0.866f},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          0,     a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               a_yaw*T,                 0,     a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          0,     -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 0,     -a_yaw*T,                   a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_4[8][6] = {
@@ -106,8 +106,8 @@ float B_State_4[8][6] = {
     {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             0,      -a_roll*T*0.5f,           a_roll*T*0.5f},
     {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  0,      a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.f},
     {0,                      0,                       a_pitch*T*0.866f,         0,      a_pitch*T*0.866f,         -a_pitch*T*0.866f},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          0,      a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 0,      a_yaw*T,                  -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          0,      a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 0,      a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_5[8][6] = {
@@ -117,8 +117,8 @@ float B_State_5[8][6] = {
     {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            0,     a_roll*T*0.5f},
     {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  0,     -a_pitch*T*T*0.866f/2.f},
     {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         0,     -a_pitch*T*0.866f},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            0,     -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   0,     -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,            0,     a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 -a_yaw*T,                   0,     a_yaw*T}
 };
 
 float B_State_6[8][6] = {
@@ -128,8 +128,8 @@ float B_State_6[8][6] = {
     {-a_roll*T,              a_roll*T,                a_roll*T*0.5,             -a_roll*T*0.5f,            -a_roll*T*0.5f,           0},
     {0,                      0,                       a_pitch*T*T*0.866f/2.0f,  -a_pitch*T*T*0.866f/2.0f,  a_pitch*T*T*0.866f/2.0f,  0},
     {0,                      0,                       a_pitch*T*0.866f,         -a_pitch*T*0.866f,         a_pitch*T*0.866f,         0},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           0},
-    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  0}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           0},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 -a_yaw*T,                   a_yaw*T,                  0}
 };
 
 #else

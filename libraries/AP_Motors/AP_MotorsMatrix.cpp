@@ -22,6 +22,7 @@
 #include "AP_MotorsMatrix.h"
 
 extern const AP_HAL::HAL& hal;
+extern int8_t number_IMM;
 
 #include <GCS_MAVLink/GCS.h>
 
@@ -126,11 +127,13 @@ void AP_MotorsMatrix::output_to_motors()
         }
     }
 
+    //gcs().send_text(MAV_SEVERITY_CRITICAL, "%d", motor_out[3]);
+
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(0, 0);
-        //rc_write(3, 0);
+        //rc_write(0, 0);
+        rc_write(3, 0);
         //rc_write(4,0);
 
         //舵机输出
@@ -267,7 +270,8 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------
-    if(fault_injection_a == 0){                 //故障注入后，更改控制分配
+    //if(fault_injection_a == 0){     
+    if(number_IMM == 1){            //故障注入后，更改控制分配
         _roll_factor[0] = 0.0f;                 //1号旋翼失效时的控制分配
         _roll_factor[1] = 0.4f;
         _roll_factor[2] = 0.3f;
@@ -289,9 +293,8 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         _yaw_factor[4] = 0.25f * 1.667f;
         _yaw_factor[5] = 0.15f * 1.667f;
 
-
-
-        /* _roll_factor[0] = -0.5f;                                  // -0.3529f * (5.0f/3.529f);                 //4号旋翼失效时的控制分配
+    }else if(number_IMM == 4){
+        _roll_factor[0] = -0.5f;                                  // -0.3529f * (5.0f/3.529f);                 //4号旋翼失效时的控制分配
         _roll_factor[1] = 0.416f;                                 // 0.2941f * (5.0f/3.529f);
         _roll_factor[2] = 0.5f;                                   // 0.3529f * (5.0f/3.529f);
         _roll_factor[3] = 0.0f;                                     // 0.0f * (5.0f/3.529f);
@@ -310,7 +313,7 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         _yaw_factor[2] = -0.416f;                                               // -0.2941f * (5.0f/3.529f);
         _yaw_factor[3] = 0.0f;                                               // 0.0f * (5.0f/3.529f);
         _yaw_factor[4] = 0.5f;                                               // 0.3529f * (5.0f/3.529f);
-        _yaw_factor[5] = 0.083f;                                               // 0.0588f * (5.0f/3.529f); */
+        _yaw_factor[5] = 0.083f;                                               // 0.0588f * (5.0f/3.529f);
 
     }
 //-----------------------------------------------------------------------------------------------------------------------------------
@@ -405,18 +408,21 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
 
 //---------------------------------------------------------------------------------------------------------------------------------
-    if(fault_injection_a == 0){
+    if(number_IMM == 1){
+        _thrust_rpyt_out[0] = 0;
         _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1/0.3) + rpy_scale*_thrust_rpyt_out[1];//一号旋翼失效时的控制分配
         _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.2/0.3) + rpy_scale*_thrust_rpyt_out[2];
         _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.3/0.3) + rpy_scale*_thrust_rpyt_out[3];
         _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.25/0.3) + rpy_scale*_thrust_rpyt_out[4];
         _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.15/0.3) + rpy_scale*_thrust_rpyt_out[5];
 
-       /*  _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.3235/0.3235) + rpy_scale*_thrust_rpyt_out[1];//4号旋翼失效时的控制分配
-        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1471/0.3235) + rpy_scale*_thrust_rpyt_out[2];
-        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.1765/0.3235) + rpy_scale*_thrust_rpyt_out[3];
+    }else if(number_IMM == 4){
+        _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.3235/0.3235) + rpy_scale*_thrust_rpyt_out[0];//4号旋翼失效时的控制分配
+        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1471/0.3235) + rpy_scale*_thrust_rpyt_out[1];
+        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.1765/0.3235) + rpy_scale*_thrust_rpyt_out[2];
+        _thrust_rpyt_out[3] = 0;
         _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.0882/0.3235) + rpy_scale*_thrust_rpyt_out[4];
-        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.2647/0.3235) + rpy_scale*_thrust_rpyt_out[5]; */
+        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.2647/0.3235) + rpy_scale*_thrust_rpyt_out[5];
 
     }
 //---------------------------------------------------------------------------------------------------------------------------------

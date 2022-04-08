@@ -736,8 +736,12 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     }
     hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
 
+    //gcs().send_text(MAV_SEVERITY_CRITICAL, "%.2f,%.2f,%.2f,%.2f,%.2f,%.2f,%.2f", 
+    //                Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
+
+    //------------------------------------------------------------------------------------------------------------------------------
     //寻找可能性最大的模型概率
-    if(Mu_next[0]>=0.3){
+    /* if(Mu_next[0]>=0.3){
         model_number = 0;
     }else if(Mu_next[1]>=0.3){
         model_number = 1;
@@ -758,7 +762,24 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
         model_number = 6;
     }else{
         model_number = 0;
+    } */
+
+    float max = 0;
+    int8_t num = 0;
+    for(i=0;i<7;i++){
+        if(Mu_next[i] > max){
+            max = Mu_next[i];
+            num = i;
+        }
     }
+
+    if(max<0.3){
+        num = 0;
+    }
+
+    model_number = num;
+
+    //-----------------------------------------------------------------------------------------------------------------------------
 
     //t_run++;
     
