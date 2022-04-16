@@ -2,8 +2,8 @@
 #include "math.h"
 #include <GCS_MAVLink/GCS.h>
 
-#define plus
-//#define X
+//#define plus
+#define X
 
 float T = 0.303;
 //float T = 0.1;                 //定义函数运行周期，将函数放入100Hz循环//3.3Hz

@@ -26,6 +26,8 @@ extern const AP_HAL::HAL& hal;
 #include <GCS_MAVLink/GCS.h>
 
 extern int8_t fault_injection_a;
+extern int8_t number_IMM;
+extern int8_t switch_control_factor;
 
 // init
 void AP_MotorsMatrix::init(motor_frame_class frame_class, motor_frame_type frame_type)
@@ -128,17 +130,25 @@ void AP_MotorsMatrix::output_to_motors()
 
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
+        //舵机倾斜角度与pwm值： 
+        //                  15°：1366   |   10°：1411   |   12°:1393   |    8°:1428
+        //                  
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(3, 0);
+        rc_write(2, 0);
         //rc_write(1, 0);
         //rc_write(4,0);
 
         //舵机输出
         //rc_write(8,1500);
-        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1900);//控制舵机的输出
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1393);//控制舵机的输出
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
+    }
 
-    }else{
-        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1100);
+    if(switch_control_factor >= 2){
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1393);//控制舵机的输出
+        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);//控制舵机的输出
+    }else{//无故障时，舵机pwm值1500时在中位，倾斜旋翼无倾斜角度竖直向上
+        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
     }
     /*---------------------------------------------------------------------------------------------------------*/
 }
@@ -265,6 +275,42 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
     throttle_thrust_best_rpy = MIN(0.5f, throttle_avg_max);
 
+
+    //----------------------------------------------------------------------------------------------------------------------------
+
+    /* if(number_IMM == 3){
+    //if(fault_injection_a == 0){
+
+        switch_control_factor = switch_control_factor + 1;
+    } */
+
+    /* if(switch_control_factor >= 2){
+        switch_control_factor = 2;
+
+        _roll_factor[0] = -0.28f;
+        _roll_factor[1] =  0.5f;
+        _roll_factor[2] =  0.0f;
+        _roll_factor[3] = -0.41f;
+        _roll_factor[4] = -0.11f;
+        _roll_factor[5] =  0.3f;
+
+        _pitch_factor[0] =  0.13f;
+        _pitch_factor[1] =  0.13f;
+        _pitch_factor[2] =  0.0f;
+        _pitch_factor[3] = -0.5f;
+        _pitch_factor[4] =  0.38f;
+        _pitch_factor[5] = -0.14f;
+
+        _yaw_factor[0] = -0.40f;
+        _yaw_factor[1] =  0.11f;
+        _yaw_factor[2] =  0.0f;
+        _yaw_factor[3] =  0.5f;
+        _yaw_factor[4] =  0.14f;
+        _yaw_factor[5] = -0.36f;
+    } */
+
+    //----------------------------------------------------------------------------------------------------------------------------
+
     // calculate roll and pitch for each motor
     // calculate the amount of yaw input that each motor can accept
     for (i=0; i<AP_MOTORS_MAX_NUM_MOTORS; i++) {
@@ -351,6 +397,20 @@ void AP_MotorsMatrix::output_armed_stabilizing()
             _thrust_rpyt_out[i] = throttle_thrust_best_rpy + thr_adj + rpy_scale*_thrust_rpyt_out[i];
         }
     }
+
+    //----------------------------------------------------------------------------------------------------------------------------
+    //if(number_IMM == 3){
+    /* if(switch_control_factor >= 2){
+    //if(fault_injection_a == 0){
+        _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.4795f/0.5f) + rpy_scale*_thrust_rpyt_out[0];
+        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.5f/0.5f) + rpy_scale*_thrust_rpyt_out[1];
+        _thrust_rpyt_out[2] = 0;
+        _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.0278f/0.5f) + rpy_scale*_thrust_rpyt_out[3];
+        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.4950f/0.5f) + rpy_scale*_thrust_rpyt_out[4];
+        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.4672f/0.5f) + rpy_scale*_thrust_rpyt_out[5];
+    } */
+    //----------------------------------------------------------------------------------------------------------------------------
+
 
     // constrain all outputs to 0.0f to 1.0f
     // test code should be run with these lines commented out as they should not do anything

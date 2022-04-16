@@ -13,9 +13,18 @@ void Copter::userhook_init()
 #endif
 
 #ifdef USERHOOK_FASTLOOP
+
+extern int8_t number_IMM;
+extern int8_t switch_control_factor;
+
 void Copter::userhook_FastLoop()//100Hz循环
 {
     State_refresh();
+    if(number_IMM == 3){
+    //if(fault_injection_a == 0){
+
+        switch_control_factor = switch_control_factor + 1;
+    }
 }
 #endif
 
