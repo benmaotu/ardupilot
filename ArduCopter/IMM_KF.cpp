@@ -1,4 +1,5 @@
 #include "IMM_KF.h"
+#include "Parameters.h"
 
 float U_IMM[6];
 float x_IMM[8];
@@ -6,11 +7,12 @@ float Z_IMM[4];
 int8_t number_IMM;
 
 int8_t switch_control_factor = 0;//将故障诊断加入控制系统，该参数用于根据故障诊断结果，切换控制分配以及舵机倾斜角度
+//int16_t Servo_tilt_angle;
 
 void Copter::State_refresh(){
     float z,phi,theta,psai;
     float z_dot,phi_dot,theta_dot,psai_dot;
-    
+
 
     z     = inertial_nav.get_altitude();
     phi   = attitude_control->get_att_target_euler_cd().x;
@@ -44,7 +46,7 @@ void Copter::State_refresh(){
     /* float x_1_IMM[8] = {5, 0, 0, 0, 0, 0, 0, 0};
     float U_1_IMM[6] = {1560,1560,1560,1560,1560,1560};
     float Z_1_IMM[4] = {5, 0, 0, 0}; */
-    hal.console->printf("bbb\n");
+    //hal.console->printf("bbb\n");
     //hal.console->printf("%d",number_IMM);
     //IMM_Kalman_Filter(x_1_IMM,U_1_IMM,Z_1_IMM);
 
@@ -106,7 +108,7 @@ float Copter::get_mat_det(float a[4][4])
 //交互式多模型卡尔曼滤波函数
 int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
 {
-    hal.console->printf("aaa\n");
+    //hal.console->printf("aaa\n");
     //初次运行时的初始化
     if(Mu_last[0]+Mu_last[1]+Mu_last[2]+Mu_last[3]+Mu_last[4]+Mu_last[5]+Mu_last[6] <0.1 ){
         for(i=0;i<8;i++){
@@ -736,7 +738,7 @@ int Copter::IMM_Kalman_Filter(float x_real[8],float U_in[6],float z_real[4])
     for(i=0;i<7;i++){
         Mu_next[i] = Mu_pre[i]*C_IMM_b[i]/C_IMM;
     }
-    hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
+    //hal.console->printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n",Mu_next[0],Mu_next[1],Mu_next[2],Mu_next[3],Mu_next[4],Mu_next[5],Mu_next[6]);
 
     //寻找可能性最大的模型概率
     /* if(Mu_next[0]>=0.3){

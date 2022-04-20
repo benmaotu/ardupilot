@@ -183,6 +183,10 @@ const AP_Param::GroupInfo AP_MotorsMulticopter::var_info[] = {
     // @User: Advanced
     AP_GROUPINFO("BAT_IDX",  39, AP_MotorsMulticopter,  _batt_idx, 0),
 
+    //----------------------------------------------------------------------------------------------------------------------
+    AP_GROUPINFO("FTC_ANGLE",  40, AP_MotorsMulticopter,  FTC_tilt_angle, 1500),
+    //----------------------------------------------------------------------------------------------------------------------
+
     AP_GROUPEND
 };
 

@@ -131,10 +131,10 @@ void AP_MotorsMatrix::output_to_motors()
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
         //舵机倾斜角度与pwm值： 
-        //                  15°：1366   |   10°：1411   |   12°:1393   |    8°:1428
+        //                  15°：1366   |   10°：1411   |   12°:1393   |    8°:1428     |11°:1402
         //                  
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(2, 0);
+        rc_write(5, 0);
         //rc_write(1, 0);
         //rc_write(4,0);
 
@@ -145,8 +145,8 @@ void AP_MotorsMatrix::output_to_motors()
     }
 
     if(switch_control_factor >= 2){
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1393);//控制舵机的输出
-        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);//控制舵机的输出
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  g2.FTC_tilt_angle);//控制舵机的输出
+        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  FTC_tilt_angle);//控制舵机的输出
     }else{//无故障时，舵机pwm值1500时在中位，倾斜旋翼无倾斜角度竖直向上
         SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
     }
@@ -284,30 +284,31 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         switch_control_factor = switch_control_factor + 1;
     } */
 
-    /* if(switch_control_factor >= 2){
+    if(switch_control_factor >= 2){
         switch_control_factor = 2;
+    //if(fault_injection_a == 0){
 
         _roll_factor[0] = -0.28f;
         _roll_factor[1] =  0.5f;
-        _roll_factor[2] =  0.0f;
-        _roll_factor[3] = -0.41f;
-        _roll_factor[4] = -0.11f;
-        _roll_factor[5] =  0.3f;
+        _roll_factor[2] =  0.3f;
+        _roll_factor[3] = -0.11f;
+        _roll_factor[4] = -0.42f;
+        _roll_factor[5] =  0.0f;
 
-        _pitch_factor[0] =  0.13f;
-        _pitch_factor[1] =  0.13f;
-        _pitch_factor[2] =  0.0f;
-        _pitch_factor[3] = -0.5f;
-        _pitch_factor[4] =  0.38f;
-        _pitch_factor[5] = -0.14f;
+        _pitch_factor[0] =  -0.13f;
+        _pitch_factor[1] =  -0.13f;
+        _pitch_factor[2] =  0.14f;
+        _pitch_factor[3] = -0.38f;
+        _pitch_factor[4] =  0.5f;
+        _pitch_factor[5] = -0.0f;
 
         _yaw_factor[0] = -0.40f;
         _yaw_factor[1] =  0.11f;
-        _yaw_factor[2] =  0.0f;
-        _yaw_factor[3] =  0.5f;
-        _yaw_factor[4] =  0.14f;
-        _yaw_factor[5] = -0.36f;
-    } */
+        _yaw_factor[2] =  -0.36f;
+        _yaw_factor[3] =  0.14f;
+        _yaw_factor[4] =  0.5f;
+        _yaw_factor[5] = -0.0f;
+    }
 
     //----------------------------------------------------------------------------------------------------------------------------
 
@@ -400,15 +401,15 @@ void AP_MotorsMatrix::output_armed_stabilizing()
 
     //----------------------------------------------------------------------------------------------------------------------------
     //if(number_IMM == 3){
-    /* if(switch_control_factor >= 2){
+    if(switch_control_factor >= 2){
     //if(fault_injection_a == 0){
-        _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.4795f/0.5f) + rpy_scale*_thrust_rpyt_out[0];
+        _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.4773f/0.5f) + rpy_scale*_thrust_rpyt_out[0];
         _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.5f/0.5f) + rpy_scale*_thrust_rpyt_out[1];
-        _thrust_rpyt_out[2] = 0;
-        _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.0278f/0.5f) + rpy_scale*_thrust_rpyt_out[3];
-        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.4950f/0.5f) + rpy_scale*_thrust_rpyt_out[4];
-        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.4672f/0.5f) + rpy_scale*_thrust_rpyt_out[5];
-    } */
+        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.4630f/0.5f) + rpy_scale*_thrust_rpyt_out[2];
+        _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.4960f/0.5f) + rpy_scale*_thrust_rpyt_out[3];
+        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.0331f/0.5f) + rpy_scale*_thrust_rpyt_out[4];
+        _thrust_rpyt_out[5] = 0;
+    }
     //----------------------------------------------------------------------------------------------------------------------------
 
 

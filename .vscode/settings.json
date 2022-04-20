@@ -28,7 +28,9 @@
         "cmath": "cpp",
         "*.tcc": "cpp",
         "iostream": "cpp",
-        "*.idl": "cpp"
+        "*.idl": "cpp",
+        "unordered_map": "cpp",
+        "numeric": "cpp"
     },
     // 切换到当前工作目录
     "terminal.integrated.env.windows": {
