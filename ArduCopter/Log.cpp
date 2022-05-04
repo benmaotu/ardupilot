@@ -92,6 +92,25 @@ void Copter::Log_Write_Optflow()
  #endif     // OPTFLOW == ENABLED
 }
 
+//--------------------------------------------------------------------------------------------------------------------------------
+//添加自定义日志
+struct PACKED log_FDI_flag {
+    LOG_PACKET_HEADER;
+    uint64_t time_us;
+    uint8_t flag;
+};
+
+void Copter::Log_Write_FDI_Flag(uint8_t fdi_flag)
+{
+    struct log_FDI_flag pkt = {
+        LOG_PACKET_HEADER_INIT(LOG_FDI_MSG),
+        time_us     : AP_HAL::micros64(),
+        flag        : fdi_flag,
+    };
+    copter.DataFlash.WriteBlock(&pkt, sizeof(pkt));
+}
+//--------------------------------------------------------------------------------------------------------------------------------
+
 struct PACKED log_Control_Tuning {
     LOG_PACKET_HEADER;
     uint64_t time_us;
@@ -503,6 +522,12 @@ const struct LogStructure Copter::log_structure[] = {
     { LOG_OPTFLOW_MSG, sizeof(log_Optflow),
       "OF",   "QBffff",   "TimeUS,Qual,flowX,flowY,bodyX,bodyY", "s-EEEE", "F-0000" },
 #endif
+
+//---------------------------------------------------------------------------------------------------------------------------------
+    { LOG_FDI_MSG,sizeof(log_FDI_flag),
+      "FDI",   "QB",    "TimeUS,flag", "s-", "F-"},
+//---------------------------------------------------------------------------------------------------------------------------------
+
     { LOG_CONTROL_TUNING_MSG, sizeof(log_Control_Tuning),
       "CTUN", "Qffffffefcfhh", "TimeUS,ThI,ABst,ThO,ThH,DAlt,Alt,BAlt,DSAlt,SAlt,TAlt,DCRt,CRt", "s----mmmmmmnn", "F----00B0BBBB" },
     { LOG_MOTBATT_MSG, sizeof(log_MotBatt),

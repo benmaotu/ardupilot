@@ -10,6 +10,7 @@
 #define AP_MOTORS_MATRIX_YAW_FACTOR_CW   -1
 #define AP_MOTORS_MATRIX_YAW_FACTOR_CCW   1
 
+
 /// @class      AP_MotorsMatrix
 class AP_MotorsMatrix : public AP_MotorsMulticopter {
 public:
@@ -41,6 +42,8 @@ public:
     //为故障诊断添加函数，以获取输入到电机的pwm值------------------------------------------------------------------------------------------
 
     void                output_to_motors_IMM(float a[6]);
+    
+    int8_t FDI_flag;
 
     //----------------------------------------------------------------------------------------------------------------------------------
 

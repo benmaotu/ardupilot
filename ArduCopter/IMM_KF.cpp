@@ -6,6 +6,8 @@ float x_IMM[8];
 float Z_IMM[4];
 int8_t number_IMM;
 
+int8_t log_fdi;
+
 int8_t switch_control_factor = 0;//将故障诊断加入控制系统，该参数用于根据故障诊断结果，切换控制分配以及舵机倾斜角度
 //int16_t Servo_tilt_angle;
 
@@ -57,6 +59,8 @@ void Copter::State_refresh(){
         //gcs().send_text(MAV_SEVERITY_CRITICAL, "%d", number_IMM);
         
     //}
+
+    Log_Write_FDI_Flag(log_fdi);
 
 }
 

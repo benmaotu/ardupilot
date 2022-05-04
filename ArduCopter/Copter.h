@@ -822,6 +822,11 @@ private:
     void Log_Write_Vehicle_Startup_Messages();
     void log_init(void);
 
+    //-------------------------------------------------------------------------------------------------------------------------------
+    //添加自定义日志
+    void Log_Write_FDI_Flag(uint8_t fdi_flag);
+    //-------------------------------------------------------------------------------------------------------------------------------
+
     // mode.cpp
     bool set_mode(control_mode_t mode, mode_reason_t reason);
     void update_flight_mode();
