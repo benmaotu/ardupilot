@@ -145,13 +145,18 @@ void AP_MotorsMatrix::output_to_motors()
         //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
     //}
 
-    //if(switch_control_factor >= 2){
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  g2.FTC_tilt_angle);//控制舵机的输出
-        SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  FTC_tilt_angle);//控制舵机的输出
-        FDI_flag = 1;
-    }else{//无故障时，舵机pwm值1500时在中位，倾斜旋翼无倾斜角度竖直向上
+        if(switch_control_factor >= 2){
+            //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  g2.FTC_tilt_angle);//控制舵机的输出
+            SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  FTC_tilt_angle);//控制舵机的输出
+            FDI_flag = 1;
+            switch_control_factor = 2;
+        }
+    }
+
+    else{//无故障时，舵机pwm值1500时在中位，倾斜旋翼无倾斜角度竖直向上
         SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
         FDI_flag = 0;
+        switch_control_factor = 0;
     }
 
     log_fdi = FDI_flag;
@@ -290,7 +295,7 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     } */
 
     //if(switch_control_factor >= 2){
-        switch_control_factor = 2;
+        //switch_control_factor = 2;
     /* if(fault_injection_a == 0){
 
         _roll_factor[0] = -0.25f;
