@@ -132,22 +132,23 @@ void AP_MotorsMatrix::output_to_motors()
     /*---------------------------------20220228----------------------------------------------------------------*/
     if(fault_injection_a == 0){
         //舵机倾斜角度与pwm值： 
-        //                  15°：1366   |   10°：1411   |   12°:1393   |    8°:1428     |11°:1402   |6°:1446
+        //                  15°：1366   |   10°：1411   |   12°:1393   |    8°:1428     
+        //                  |11°:1402   |6°:1446    |9°：1419   |2°（4号）：1482   |-3°(2号)：1527  |-5°（5号\6号）：1545
         //                  
         //motor_out[4] = 0;//故障注入，停转5号电机
-        rc_write(5, 0);
+        rc_write(4, 0);//故障注入5号旋翼
         //rc_write(1, 0);
         //rc_write(4,0);
 
         //舵机输出
         //rc_write(8,1500);
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1393);//控制舵机的输出
-        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  FTC_tilt_angle);//控制舵机的输出
+        //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1545);
     //}
 
         if(switch_control_factor >= 2){
             //SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  g2.FTC_tilt_angle);//控制舵机的输出
-            SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  FTC_tilt_angle);//控制舵机的输出
+            SRV_Channels::set_output_pwm(SRV_Channel::k_fault_tolerant,  1500);//控制舵机的输出
             FDI_flag = 1;
             switch_control_factor = 2;
         }
@@ -298,26 +299,26 @@ void AP_MotorsMatrix::output_armed_stabilizing()
         //switch_control_factor = 2;
     /* if(fault_injection_a == 0){
 
-        _roll_factor[0] = -0.25f;
-        _roll_factor[1] =  0.5f;
-        _roll_factor[2] =  0.27f;
-        _roll_factor[3] = -0.16f;
-        _roll_factor[4] = -0.42f;
-        _roll_factor[5] =  0.0f;
+        _roll_factor[0] = 0.0f;
+        _roll_factor[1] =  0.4f;
+        _roll_factor[2] =  0.3f;
+        _roll_factor[3] = -0.3f;
+        _roll_factor[4] = -0.5f;
+        _roll_factor[5] =  0.1f;
 
-        _pitch_factor[0] =  -0.15f;
-        _pitch_factor[1] =  -0.14f;
-        _pitch_factor[2] =  0.16f;
-        _pitch_factor[3] = -0.40f;
+        _pitch_factor[0] =  0.0f;
+        _pitch_factor[1] =  0.0f;
+        _pitch_factor[2] =  0.5f;
+        _pitch_factor[3] = -0.5f;
         _pitch_factor[4] =  0.5f;
-        _pitch_factor[5] = -0.0f;
+        _pitch_factor[5] = -0.5f;
 
-        _yaw_factor[0] = -0.5f;
-        _yaw_factor[1] =  0.12f;
-        _yaw_factor[2] =  -0.36f;
-        _yaw_factor[3] =  0.14f;
-        _yaw_factor[4] =  0.5f;
-        _yaw_factor[5] = -0.0f;
+        _yaw_factor[0] = 0.0f;
+        _yaw_factor[1] =  0.1667f;
+        _yaw_factor[2] =  -0.5;
+        _yaw_factor[3] =  -0.3333f;
+        _yaw_factor[4] =  0.4167f;
+        _yaw_factor[5] = 0.25f;
     } */
 
     //----------------------------------------------------------------------------------------------------------------------------
@@ -413,12 +414,12 @@ void AP_MotorsMatrix::output_armed_stabilizing()
     //if(number_IMM == 3){
     //if(switch_control_factor >= 2){
     /* if(fault_injection_a == 0){
-        _thrust_rpyt_out[0] = (throttle_thrust_best_rpy + thr_adj) * (0.4377f/0.5f) + rpy_scale*_thrust_rpyt_out[0];
-        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.4290f/0.5f) + rpy_scale*_thrust_rpyt_out[1];
-        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.4062f/0.5f) + rpy_scale*_thrust_rpyt_out[2];
+        _thrust_rpyt_out[0] = 0;
+        _thrust_rpyt_out[1] = (throttle_thrust_best_rpy + thr_adj) * (0.1667f/0.5f) + rpy_scale*_thrust_rpyt_out[1];
+        _thrust_rpyt_out[2] = (throttle_thrust_best_rpy + thr_adj) * (0.3333f/0.5f) + rpy_scale*_thrust_rpyt_out[2];
         _thrust_rpyt_out[3] = (throttle_thrust_best_rpy + thr_adj) * (0.5f/0.5f) + rpy_scale*_thrust_rpyt_out[3];
-        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.0938f/0.5f) + rpy_scale*_thrust_rpyt_out[4];
-        _thrust_rpyt_out[5] = 0;
+        _thrust_rpyt_out[4] = (throttle_thrust_best_rpy + thr_adj) * (0.4167f/0.5f) + rpy_scale*_thrust_rpyt_out[4];
+        _thrust_rpyt_out[5] = (throttle_thrust_best_rpy + thr_adj) * (0.25f/0.5f) + rpy_scale*_thrust_rpyt_out[5];
     } */
     //----------------------------------------------------------------------------------------------------------------------------
 
@@ -606,7 +607,7 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                     add_motor(AP_MOTORS_MOT_6, 120, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  3);
                     success = true;
                     break;
-                case MOTOR_FRAME_TYPE_X:
+                /* case MOTOR_FRAME_TYPE_X:
                     add_motor(AP_MOTORS_MOT_1,  90, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
                     add_motor(AP_MOTORS_MOT_2, -90, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5);
                     add_motor(AP_MOTORS_MOT_3, -30, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  6);
@@ -614,7 +615,39 @@ void AP_MotorsMatrix::setup_motors(motor_frame_class frame_class, motor_frame_ty
                     add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
                     add_motor(AP_MOTORS_MOT_6,-150, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  4);
                     success = true;
+                    break; */
+
+                case MOTOR_FRAME_TYPE_X:
+                    add_motor(AP_MOTORS_MOT_1,  90, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  2);
+                    add_motor(AP_MOTORS_MOT_2, -90, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 5);
+                    add_motor(AP_MOTORS_MOT_3, -30, AP_MOTORS_MATRIX_YAW_FACTOR_CW,  6);
+                    add_motor(AP_MOTORS_MOT_4, 150, AP_MOTORS_MATRIX_YAW_FACTOR_CW, 3);
+                    add_motor(AP_MOTORS_MOT_5,  30, AP_MOTORS_MATRIX_YAW_FACTOR_CCW, 1);
+                    add_motor(AP_MOTORS_MOT_6,-150, AP_MOTORS_MATRIX_YAW_FACTOR_CCW,  4);
+                    success = true;
+
+                    _roll_factor[AP_MOTORS_MOT_1] = -0.2857;
+                    _roll_factor[AP_MOTORS_MOT_2] = 0.2857;
+                    _roll_factor[AP_MOTORS_MOT_3] = 0.3571;
+                    _roll_factor[AP_MOTORS_MOT_4] = -0.0714;
+                    _roll_factor[AP_MOTORS_MOT_5] = -0.3571;
+                    _roll_factor[AP_MOTORS_MOT_6] = 0.0714;
+
+                    _pitch_factor[AP_MOTORS_MOT_1] = 0;
+                    _pitch_factor[AP_MOTORS_MOT_2] = 0;
+                    _pitch_factor[AP_MOTORS_MOT_3] = 0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_4] = -0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_5] = 0.2887;
+                    _pitch_factor[AP_MOTORS_MOT_6] = -0.2887;
+
+                    _yaw_factor[AP_MOTORS_MOT_1] = -0.0714;
+                    _yaw_factor[AP_MOTORS_MOT_2] = 0.0714;
+                    _yaw_factor[AP_MOTORS_MOT_3] = -0.2857;
+                    _yaw_factor[AP_MOTORS_MOT_4] = -0.1429;
+                    _yaw_factor[AP_MOTORS_MOT_5] = 0.2857;
+                    _yaw_factor[AP_MOTORS_MOT_6] = 0.1429;
                     break;
+
                 case MOTOR_FRAME_TYPE_H:
                     // H is same as X except middle motors are closer to center
                     add_motor_raw(AP_MOTORS_MOT_1, -1.0f, 0.0f, AP_MOTORS_MATRIX_YAW_FACTOR_CW, 2);
