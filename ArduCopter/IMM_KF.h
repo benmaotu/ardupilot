@@ -2,8 +2,8 @@
 #include "math.h"
 #include <GCS_MAVLink/GCS.h>
 
-//#define plus
-#define X
+#define plus
+//#define X
 
 float T = 0.303;
 //float T = 0.1;                 //定义函数运行周期，将函数放入100Hz循环//3.3Hz
@@ -141,8 +141,8 @@ float B_State_6[8][6] = {
     {0.0f,                   0.0f,                    a_roll*T*0.866f,          -a_roll*T*0.866f,          a_roll*T*0.866f,          -a_roll*T*0.866f},
     {a_pitch*T*T/2.0f,       -a_pitch*T*T/2.0f,       -a_pitch*T*T*0.5f/2.0f,   a_pitch*T*T*0.5f/2.0f,     a_pitch*T*T*0.5f/2.0f,    -a_pitch*T*T*0.5f/2.f},
     {a_pitch*T,              -a_pitch*T,              -a_pitch*T*0.5f,          a_pitch*T*0.5f,            a_pitch*T*0.5f,           -a_pitch*T*0.5f},
-    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           -a_yaw*T*T/2.0f},
-    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 a_yaw*T,                   a_yaw*T,                  -a_yaw*T}
+    {-a_yaw*T*T/2.0f,        a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,          -a_yaw*T*T/2.0f,            a_yaw*T*T/2.0f,           a_yaw*T*T/2.0f},
+    {-a_yaw*T,               a_yaw*T,                 -a_yaw*T,                 -a_yaw*T,                   a_yaw*T,                  a_yaw*T}
 };
 
 float B_State_1[8][6] = {
